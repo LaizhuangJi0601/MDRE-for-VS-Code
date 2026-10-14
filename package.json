@@ -1,0 +1,166 @@
+{
+  "name": "mdre-vscode",
+  "displayName": "MDRE for VS Code",
+  "description": "Markdown 源码与富文本双向编辑，支持数学公式、表格、Mermaid 和可缩放的 A4 分页。",
+  "version": "0.2.0",
+  "publisher": "mdre-local",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.cjs",
+  "activationEvents": [
+    "onCustomEditor:mdre.editor"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "MDRE",
+      "properties": {
+        "mdre.pdf.browserPath": {
+          "type": "string",
+          "default": "",
+          "description": "PDF 导出使用的 Edge/Chrome 可执行文件路径；留空自动检测系统浏览器。"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "mdre.open",
+        "title": "MDRE: 打开双栏编辑器"
+      },
+      {
+        "command": "mdre.new",
+        "title": "MDRE: 新建 Markdown 文档"
+      },
+      {
+        "command": "mdre.reloadEditor",
+        "title": "MDRE: 刷新编辑界面"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "mdre.editor",
+        "displayName": "MDRE 双栏编辑器",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          },
+          {
+            "filenamePattern": "*.markdown"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "mdre.save",
+        "key": "ctrl+s",
+        "mac": "cmd+s",
+        "when": "activeCustomEditorId == mdre.editor"
+      },
+      {
+        "command": "mdre.undo",
+        "key": "ctrl+z",
+        "mac": "cmd+z",
+        "when": "activeCustomEditorId == mdre.editor"
+      },
+      {
+        "command": "mdre.redo",
+        "key": "ctrl+y",
+        "mac": "cmd+shift+z",
+        "when": "activeCustomEditorId == mdre.editor"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "mdre.open",
+          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "pnpm check && node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "dev": "node scripts/develop.mjs",
+    "test": "pnpm test:ui && pnpm test:host",
+    "test:ui": "node tests/webview.mjs",
+    "test:host": "node tests/host.mjs",
+    "test:watch": "node tests/watch.mjs",
+    "test:math": "node tests/iframe-math.mjs",
+    "test:code-core": "tsx --test tests/code-paragraph.test.ts",
+    "test:code-ui": "node tests/code-block-ui.mjs",
+    "test:insert-core": "tsx --test tests/insert-blocks.test.ts",
+    "test:insert-ui": "node tests/insert-blocks-ui.mjs",
+    "test:pdf": "node tests/pdf-export.mjs",
+    "test:pdf-style": "node tests/pdf-list-inline.mjs",
+    "package": "pnpm build && vsce package --no-dependencies",
+    "vscode:prepublish": "pnpm build",
+    "test:core": "tsx --test tests/*.test.ts",
+    "licenses": "node scripts/generate-licenses.mjs",
+    "audit:source": "node scripts/audit-source.mjs",
+    "screenshot": "node scripts/screenshot.mjs"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-markdown": "^6.3.4",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.5",
+    "@lezer/highlight": "^1.2.5",
+    "entities": "^6.0.1",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.47",
+    "markdown-it": "^14.1.0",
+    "mathlive": "0.111.1",
+    "mermaid": "^11.12.1",
+    "playwright-core": "1.64.0",
+    "prosemirror-commands": "^1.7.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-markdown": "^1.13.8",
+    "prosemirror-model": "^1.25.4",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.3",
+    "prosemirror-transform": "^1.10.5",
+    "prosemirror-view": "^1.41.3",
+    "@tauri-apps/api": "^2.10.1"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-electron": "^2.5.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.25.0",
+    "playwright": "^1.56.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2"
+  },
+  "icon": "media/icon.png",
+  "keywords": [
+    "markdown",
+    "wysiwyg",
+    "editor",
+    "A4",
+    "MDRE"
+  ],
+  "pricing": "Free",
+  "packageManager": "pnpm@12.11.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LaizhuangJi0601/MDRE-for-VS-Code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/issues"
+  },
+  "homepage": "https://github.com/LaizhuangJi0601/MDRE-for-VS-Code#readme"
+}

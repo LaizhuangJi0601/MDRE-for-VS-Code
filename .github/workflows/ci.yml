@@ -1,0 +1,20 @@
+name: Build and package
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm audit:source
+      - run: pnpm test:core
+      - run: pnpm package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mdre-vsix
+          path: '*.vsix'

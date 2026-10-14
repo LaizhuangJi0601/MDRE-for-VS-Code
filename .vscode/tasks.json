@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0",
+  "tasks": [{
+    "label": "MDRE 监听编译", "type": "shell", "command": "pnpm watch",
+    "isBackground": true,
+    "problemMatcher": [{
+      "owner": "mdre", "pattern": { "regexp": "^ERROR (.*):(\\d+):(\\d+) (.*)$", "file": 1, "line": 2, "column": 3, "message": 4 },
+      "background": { "activeOnStart": true, "beginsPattern": "MDRE_BUILD_START", "endsPattern": "MDRE_BUILD_READY" }
+    }],
+    "presentation": { "reveal": "always", "panel": "dedicated" }
+  }]
+}
