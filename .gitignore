@@ -1,0 +1,13 @@
+node_modules/
+.cache/
+dist/
+out/
+.tmp/
+output/
+.playwright-cli/
+*.vsix
+*.log
+.env
+.env.*
+SOURCE_MANIFEST.json
+BUILDINFO.json

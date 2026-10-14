@@ -1,0 +1,2 @@
+MDRE for VS Code includes third-party components and fonts.
+The project license is in LICENSE. The in-application help contains generated dependency and upstream license documents; bundled packages such as Playwright Core retain their LICENSE and NOTICE files.

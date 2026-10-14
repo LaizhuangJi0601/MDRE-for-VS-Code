@@ -1,0 +1,11 @@
+/* 工具栏、图标及编辑菜单沿用 MDRE；文件标签和窗口按钮由 VS Code 提供。 */
+.tabs-bar, .window-controls, #backup, #recovery-status, #associate-md { display:none!important }
+#settings-association, #recent-menu, #recent-list { display:none!important }
+.menu-field:has(#backup-count), label:has([name="backup_count"]) { display:none!important }
+#titlebar { padding-right:12px }
+#window-title { font-size:12px }
+body { padding:0; color:var(--text) }
+/* 隐藏源码只改变布局，富文本仍由编辑模式控制可编辑性。 */
+main.source-hidden { grid-template-columns:var(--outline-width) minmax(0,1fr) }
+main.source-hidden #render-pane { grid-column:2 }
+#source-toggle[aria-pressed="true"] { background:var(--selection); color:var(--accent) }
