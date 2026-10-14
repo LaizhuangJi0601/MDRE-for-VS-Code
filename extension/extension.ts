@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { createHash, randomBytes } from 'node:crypto';
 import path from 'node:path';
 import { pdfBytes } from './pdf';
+import { absoluteImagePath } from '../src/image-path';
+import { readImage, clipboardImagePaths } from './image-files';
 
 const viewType = 'mdre.editor';
 type PanelRecord = { document: vscode.TextDocument; panel: vscode.WebviewPanel; editing: boolean; savedText: string };
@@ -69,7 +71,7 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
     html = html.replace(/<script /g, `<script nonce="${nonce}" `);
     const source = panel.webview.cspSource;
     // 现有受控格式、MathLive 和 Mermaid 会生成行内样式；文档 HTML 仍沿用 MDRE 白名单。
-    const csp = `default-src 'none'; img-src ${source} data: https:; script-src 'nonce-${nonce}' ${source}; style-src ${source} 'unsafe-inline'; font-src ${source} data:; connect-src ${source} https:;`;
+    const csp = `default-src 'none'; img-src ${source} data: https:; media-src ${source} https:; script-src 'nonce-${nonce}' ${source}; style-src ${source} 'unsafe-inline'; font-src ${source} data:; connect-src ${source} https:;`;
     html = html.replace('<head>', `<head><meta http-equiv="Content-Security-Policy" content="${csp}">`);
     html = html.replace('<body>', '<body data-vscode-context=\'{"preventDefaultContextMenuItems":true}\'>');
     panel.webview.html = html;
@@ -159,28 +161,45 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
         await vscode.workspace.fs.writeFile(vscode.Uri.file(args.path),bytes);
         return {path:args.path,bytes:bytes.length,engine:'Chromium / 系统浏览器'};
       }
+      case 'clipboard_image_paths': return clipboardImagePaths();
+      case 'pick_images': return (await vscode.window.showOpenDialog({ canSelectMany: true, title: '插入图片（引用原文件）', filters: { 图片: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'] } }))?.map(uri => uri.fsPath) ?? null;
+      case 'read_binary': {
+        const absolute = typeof args.path === 'string' ? absoluteImagePath(args.path) : null;
+        if (!absolute) throw new Error('图片需要绝对文件路径。');
+        return readImage(vscode.Uri.file(absolute));
+      }
+      case 'read_image': {
+        if (typeof args.resourceRoot !== 'string' || typeof args.relative !== 'string') throw new Error('图片资源路径无效。');
+        const name = args.relative.replace(/^assets\//, '');
+        if (!name || /[\\/]/.test(name) || name === '..') throw new Error('恢复区图片只允许扁平文件名。');
+        return readImage(vscode.Uri.joinPath(vscode.Uri.file(args.resourceRoot), name));
+      }
       case 'read_document_image': {
         if (typeof args.relative !== 'string') throw new Error('图片路径无效。');
-        const uri = vscode.Uri.joinPath(document.uri, '..', decodeURIComponent(args.relative));
-        const bytes = await vscode.workspace.fs.readFile(uri);
-        const ext = path.extname(uri.path).slice(1).toLowerCase();
-        const mime = ({ svg: 'svg+xml', jpg: 'jpeg' } as Record<string, string>)[ext] ?? ext;
-        if (!['svg+xml', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(mime)) throw new Error('图片格式不受支持。');
-        return `data:image/${mime};base64,${Buffer.from(bytes).toString('base64')}`;
+        // 前端已按 Markdown URI 解码一次，保留真实文件名中的百分号。
+        const uri = vscode.Uri.joinPath(document.uri, '..', args.relative);
+        return readImage(uri);
       }
       case 'save_image': {
-        if (document.isUntitled) throw new Error('请先保存 Markdown 文档，再插入图片。');
         const request = args.request;
         if (!request || typeof request.base64 !== 'string' || !/^(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(request.extension)) throw new Error('图片数据无效。');
         const bytes = Buffer.from(request.base64, 'base64');
         const hash = createHash('sha256').update(bytes).digest('hex');
-        const directory = vscode.Uri.joinPath(document.uri, '..', 'assets');
-        const relativePath = `assets/${hash}.${request.extension.toLowerCase()}`;
-        const uri = vscode.Uri.joinPath(document.uri, '..', relativePath);
-        let deduplicated = false;
-        try { await vscode.workspace.fs.stat(uri); deduplicated = true; } catch (reason) { if (!(reason instanceof vscode.FileSystemError) || reason.code !== 'FileNotFound') throw reason; }
-        if (!deduplicated) { await vscode.workspace.fs.createDirectory(directory); await vscode.workspace.fs.writeFile(uri, bytes); }
-        return { relativePath, absolutePath: uri.fsPath, resourceRoot: directory.fsPath, bytes: bytes.length, hash, deduplicated };
+        if (!bytes.length || bytes.length > 20 * 1024 * 1024) throw new Error('图片为空或超过 20 MB。');
+        const store = async (directory: vscode.Uri, fallback: boolean) => {
+          const uri = vscode.Uri.joinPath(directory, `${hash}.${request.extension.toLowerCase()}`);
+          await vscode.workspace.fs.createDirectory(directory);
+          let deduplicated = false;
+          try { const existing = await vscode.workspace.fs.readFile(uri); if (!Buffer.from(existing).equals(bytes)) throw new Error('图片名称冲突，原文件未覆盖。'); deduplicated = true; }
+          catch (reason) { if (!(reason instanceof vscode.FileSystemError) || reason.code !== 'FileNotFound') throw reason; }
+          if (!deduplicated) await vscode.workspace.fs.writeFile(uri, bytes);
+          return { relativePath: fallback ? `assets/${path.basename(uri.fsPath)}` : '', absolutePath: uri.fsPath, resourceRoot: directory.fsPath, bytes: bytes.length, hash, deduplicated, fallback, referenceAbsolute: document.isUntitled };
+        };
+        try { return await store(vscode.Uri.joinPath(this.context.globalStorageUri, 'images'), false); }
+        catch (primary) {
+          const directory = document.isUntitled ? vscode.Uri.joinPath(this.context.globalStorageUri, 'recovery', String(request.docId), 'assets') : vscode.Uri.joinPath(document.uri, '..', 'assets');
+          try { return await store(directory, true); } catch (fallback) { throw new Error(`持久图片目录写入失败：${primary}；assets 兜底失败：${fallback}`); }
+        }
       }
       default: throw new Error(`插件版暂不支持此操作：${command}`);
     }
