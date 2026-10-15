@@ -47,7 +47,7 @@ export async function generateLicenses() {
   for (const name of Object.keys(manifest.devDependencies ?? {})) await collect(name, root, '开发直接依赖', false);
   if (missing.length) throw new Error(`缺少依赖，请先运行 pnpm install：${[...new Set(missing)].join(', ')}`);
   const rows = [...packages.values()].sort((a, b) => a.metadata.name.localeCompare(b.metadata.name) || a.metadata.version.localeCompare(b.metadata.version));
-  const table = ['# MDRE for VS Code 第三方依赖', '', '[返回声明](../help/MDRE声明.md) · [许可证原文](许可证文本.txt)', '', '本清单记录生成时已安装的直接运行依赖、间接运行依赖及直接开发工具。未安装的平台可选依赖不列入清单。具体版权与授权条款以相应组件的上游原文为准。', '', '| 组件 | 版本 | 许可证 | 用途 |', '| --- | --- | --- | --- |'];
+  const table = ['# MDRE for VS Code 第三方依赖', '', '[返回声明](../help/third-party-notices.md) · [许可证原文](license-texts.txt)', '', '本清单记录生成时已安装的直接运行依赖、间接运行依赖及直接开发工具。未安装的平台可选依赖不列入清单。具体版权与授权条款以相应组件的上游原文为准。', '', '| 组件 | 版本 | 许可证 | 用途 |', '| --- | --- | --- | --- |'];
   const texts = ['MDRE for VS Code — Third-party license and copyright texts', 'Generated from installed plugin packages. Upstream texts are preserved below.', ''];
   for (const { metadata, directory, role } of rows) {
     const license = typeof metadata.license === 'object' ? metadata.license?.type : metadata.license;
@@ -58,8 +58,8 @@ export async function generateLicenses() {
     }
     texts.push('');
   }
-  await writeChanged('docs/licenses/依赖清单.md', table.join('\n') + '\n');
-  await writeChanged('docs/licenses/许可证文本.txt', texts.join('\n') + '\n');
+  await writeChanged('docs/licenses/dependencies.md', table.join('\n') + '\n');
+  await writeChanged('docs/licenses/license-texts.txt', texts.join('\n') + '\n');
   return rows.length;
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) console.log(`已生成 ${await generateLicenses()} 个插件依赖的授权资料。`);

@@ -1,10 +1,10 @@
 # MDRE for VS Code
 
-MDRE for VS Code 当前版本为 **0.2.1**。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
+MDRE for VS Code 当前版本为 **0.2.2**。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
 
 ## 功能
 
-- **双向编辑**：CodeMirror 源码编辑器与 ProseMirror 富文本编辑器同步；保存、自动保存、撤销和重做使用 VS Code 原生文档机制。
+- **双向编辑**：Markdown 源码与富文本编辑器同步；保存、自动保存、撤销和重做使用 VS Code 原生文档机制。
 - **格式与结构**：单行工具栏按类别分组，窄窗口可横向滚动；工具栏和右键菜单支持标题、列表、引用、链接、表格、下划线、颜色、高亮、上下标等。下划线使用通用 HTML `<u>内容</u>`。
 - **公式与图表**：KaTeX 渲染数学公式，MathLive 可视化编辑；支持 Mermaid 图表。
 - **A4 阅读与编辑**：连续或分页排版，Ctrl+滚轮缩放 25%–250%；分页按可用宽度每行显示 1–3 页，并显示页码。
@@ -30,44 +30,25 @@ MDRE for VS Code 当前版本为 **0.2.1**。提供 Markdown 源码与富文本�
 | A4 与分页 | A4 图标；设置 → 纸张与图片 → A4 排版方式 |
 | 纸张缩放 | 在渲染栏按住 Ctrl 并滚动鼠标滚轮 |
 | 下划线 | 字体组 U 按钮、Ctrl+U 或右键菜单 |
-| 单元格内容对齐 | 右键单元格 → 表格 → 左对齐／居中／右对齐，勾选显示当前状态 |
 | 编辑公式 | 双击公式 |
 | 编辑 Mermaid | 双击图表并修改源码 |
-| 帮助 | 右上角设置图标 → 设置窗口左下角“帮助” |
+| 帮助 | 设置 → 帮助 |
 
 扩展默认隐藏源码栏；设置中的“默认显示源码栏”可改变这一行为。
-插入、拖放和文件路径粘贴优先引用原图绝对 file URI，并支持相对路径渲染。截图优先保存到插件全局存储的 `images/`，`assets/` 作为兜底；未保存文档也可插图。文件夹、文件标签和启动恢复使用 VS Code 原生工作区机制。操作方法见 [使用说明](docs/help/MDRE使用.md)。
+插入的图片保存至已保存文档所在目录的 `assets/`；使用前请先保存 Markdown 文件。文件夹、文件标签和启动恢复使用 VS Code 原生工作区机制。详细操作方法可在“设置 → 帮助”中查看。
 
 ## PDF 导出
 
 需要系统安装 Microsoft Edge 或 Google Chrome。自动检测失败时，在 VS Code 设置中填写 `mdre.pdf.browserPath`。扩展不会下载 Chromium。
 
-## 安装本地包
+## 运行要求
 
 扩展要求 VS Code **1.95.0 或更高版本**。
 
-从 [Releases](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases) 下载 VSIX 安装包，在 VS Code 命令面板中执行“扩展：从 VSIX 安装”，选择 `mdre-vscode-0.2.1.vsix`。同版本更新也可执行：
-
-```powershell
-code --install-extension ".\mdre-vscode-0.2.1.vsix" --force
-```
-
-## 编译与运行
-
-开发环境使用 Node.js 24 和 pnpm 12.11.2。在项目目录运行：
-
-```powershell
-pnpm install --frozen-lockfile
-pnpm build
-pnpm package
-```
-
-按 F5 启动扩展开发宿主，或运行 `pnpm dev`。编译命令生成 `out/` 和 `dist/`，打包命令生成项目当前版本的 VSIX 安装包。
-
-## 引用与感谢
-
-感谢 CodeMirror、ProseMirror、markdown-it、KaTeX、MathLive、Mermaid 和 highlight.js 等开源项目的作者、维护者与贡献者。
-
 ## 许可证
 
-本项目使用 MIT 许可证。第三方组件及字体的版权和授权文本随包保留；应用内“设置 → 帮助 → MDRE声明”提供清单和原文。
+本项目使用 MIT 许可证。第三方组件及字体的版权和授权文本随包保留；在“设置 → 帮助”中选择“MDRE声明”，可查看清单和原文。
+
+## GitHub
+
+项目地址：[MDRE for VS Code](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code)

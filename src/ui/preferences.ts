@@ -6,6 +6,8 @@ import { settings, saveSettings, shortcutCommands, type Settings } from '../pers
 // 帮助资源由构建工具从此目录导入，随程序离线打包。
 const documents = import.meta.glob('../../docs/help/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const references = import.meta.glob('../../docs/licenses/*.{md,txt}', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
+// 包内路径使用英文，帮助菜单保留中文名称。
+const helpTitles: Record<string, string> = { 'usage.md': 'MDRE使用', 'syntax.md': 'MDRE语法', 'third-party-notices.md': 'MDRE声明' };
 type Options = { open: (dialog: HTMLDialogElement) => void; close: (dialog: HTMLDialogElement) => void; applied: () => void; fonts: (mono: boolean) => string[] };
 export function setupPreferences(options: Options) {
   const dialog = document.createElement('dialog'); dialog.id = 'settings-dialog'; dialog.dataset.cancel = 'settings-cancel';
@@ -103,8 +105,11 @@ export function setupPreferences(options: Options) {
   document.body.append(help);
   document.getElementById('settings-help')!.onclick = () => { options.close(dialog); document.getElementById('help-menu')!.click(); };
   const select = help.querySelector<HTMLSelectElement>('#help-document')!, filter = help.querySelector<HTMLInputElement>('#help-filter')!;
-  for (const path of Object.keys(documents).sort()) select.add(new Option(path.split('/').at(-1)!.replace(/\.md$/i, ''), path));
-  const usage = Object.keys(documents).find(path => path.endsWith('/MDRE使用.md'));
+  for (const path of Object.keys(documents).sort()) {
+    const name = path.split('/').at(-1)!;
+    select.add(new Option(helpTitles[name] ?? name.replace(/\.md$/i, ''), path));
+  }
+  const usage = Object.keys(documents).find(path => path.endsWith('/usage.md'));
   if (usage) select.value = usage;
   const renderer = new MarkdownIt({ html: false, linkify: false });
   const content = help.querySelector<HTMLElement>('#help-content')!;
@@ -117,7 +122,7 @@ export function setupPreferences(options: Options) {
   const show = async (path = select.value) => {
     const request = ++displayRequest;
     currentPath = path;
-    content.classList.toggle('syntax-table', path.endsWith('/MDRE语法.md'));
+    content.classList.toggle('syntax-table', path.endsWith('/syntax.md'));
     help.querySelector('#help-link-status')!.textContent = '';
     let source = documents[path] ?? '暂无帮助文档';
     if (path in references) {

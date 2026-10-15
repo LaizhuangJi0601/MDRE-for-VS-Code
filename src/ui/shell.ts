@@ -1,4 +1,4 @@
-import appIcon from '../../media/icon.ico?url';
+import appIcon from '../../media/icon.png?url';
 import { icon, iconButton } from './icons';
 import { colorPicker } from './color-picker';
 import { codeLanguages as languages } from './code-language';
