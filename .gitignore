@@ -11,4 +11,4 @@ output/
 .env.*
 SOURCE_MANIFEST.json
 BUILDINFO.json
-!/mdre-vscode-0.2.0.vsix
+!/mdre-vscode-0.2.1.vsix

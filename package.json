@@ -2,7 +2,7 @@
   "name": "mdre-vscode",
   "displayName": "MDRE for VS Code",
   "description": "Markdown 源码与富文本双向编辑，支持数学公式、表格、Mermaid 和可缩放的 A4 分页。",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "mdre-local",
   "license": "MIT",
   "engines": {

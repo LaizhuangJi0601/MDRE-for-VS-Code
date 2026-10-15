@@ -1,3 +1,4 @@
+import { icon } from './icons';
 // 每组按钮始终单行排列，分类文字位于下方。
 export function groupToolbar() {
   const bar = document.getElementById('edit-bar')!;
@@ -30,4 +31,13 @@ export function groupToolbar() {
   const controls = document.createElement('div'); controls.className = 'tool-group-controls'; controls.append(...view.childNodes);
   const label = document.createElement('span'); label.className = 'tool-group-label'; label.textContent = '视图';
   view.classList.add('tool-group'); view.append(controls, label);
+  document.getElementById('titlebar')!.hidden = true;
+  const tools = document.createElement('div'); tools.className = 'app-tools'; tools.setAttribute('aria-label', '设置与导出');
+  const settings = document.getElementById('settings-open') as HTMLButtonElement;
+  settings.innerHTML = icon('settings'); settings.className = 'icon-button'; settings.setAttribute('aria-label', '设置'); settings.dataset.tooltip = '设置';
+  const exports = document.getElementById('export-menu')!.closest('.menu')!;
+  const trigger = exports.querySelector<HTMLButtonElement>('.menu-trigger')!;
+  trigger.innerHTML = icon('export'); trigger.classList.add('icon-button'); trigger.setAttribute('aria-label', '导出'); trigger.dataset.tooltip = '导出';
+  tools.append(settings, exports); bar.append(tools);
+
 }
