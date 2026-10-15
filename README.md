@@ -1,6 +1,6 @@
 # MDRE for VS Code
 
-MDRE for VS Code 当前版本为 **0.2.0**。 本次同步 **update4** 源码及已编译 VSIX，包含标点组合选区修复、HTML 显示扩展和 A4 双向滚动改进；详见 [更新记录](CHANGELOG.md)。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
+MDRE for VS Code 当前版本为 **0.2.0**。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
 
 ## 功能
 
@@ -45,24 +45,27 @@ MDRE for VS Code 当前版本为 **0.2.0**。 本次同步 **update4** 源码及
 
 扩展要求 VS Code **1.95.0 或更高版本**。
 
-在 VS Code 命令面板中执行“扩展：从 VSIX 安装”，选择 `mdre-vscode-0.2.0.vsix`。同版本更新也可执行：
+从 [Releases](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases) 下载 VSIX 安装包，在 VS Code 命令面板中执行“扩展：从 VSIX 安装”，选择 `mdre-vscode-0.2.0.vsix`。同版本更新也可执行：
 
 ```powershell
 code --install-extension ".\mdre-vscode-0.2.0.vsix" --force
 ```
 
-## 开发
+## 编译与运行
 
 开发环境使用 Node.js 24 和 pnpm 12.11.2。在项目目录运行：
 
 ```powershell
 pnpm install --frozen-lockfile
 pnpm build
-pnpm test:core
 pnpm package
 ```
 
-按 F5 启动扩展开发宿主，或运行 `pnpm dev`。开发与测试说明见 [开发与测试](docs/开发与测试.md)，市场发布说明见 [发布指南](PUBLISHING.md)。
+按 F5 启动扩展开发宿主，或运行 `pnpm dev`。编译命令生成 `out/` 和 `dist/`，打包命令生成项目当前版本的 VSIX 安装包。
+
+## 引用与感谢
+
+感谢 CodeMirror、ProseMirror、markdown-it、KaTeX、MathLive、Mermaid 和 highlight.js 等开源项目的作者、维护者与贡献者。
 
 ## 许可证
 
