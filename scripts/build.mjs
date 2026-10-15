@@ -1,5 +1,4 @@
 import { build as bundle } from 'esbuild';
-import { generateLicenses } from './generate-licenses.mjs';
 import { build as webview } from 'vite';
 import { mkdir, writeFile, cp } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -32,7 +31,6 @@ async function build() {
   } catch (reason) { console.error(reason); if (!listening) process.exitCode = 1; }
   finally { running = false; if (again) { again = false; void build(); } }
 }
-await generateLicenses();
 await mkdir('out', { recursive: true });
 if (listening) {
   let timer;

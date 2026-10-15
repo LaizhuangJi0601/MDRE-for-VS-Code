@@ -7,12 +7,13 @@ import { MDREProvider } from '../extension/extension';
 export async function run() {
   const root = path.resolve(__dirname, '../..');
   const folder = vscode.Uri.file(path.join(root, '.tmp/host'));
-  const uri = vscode.Uri.joinPath(folder, 'fixture.md');
+  // 独立文档避免复用上次测试窗口恢复的编辑器及撤销历史。
+  const uri = vscode.Uri.joinPath(folder, `fixture-${Date.now()}.md`);
   await vscode.workspace.fs.writeFile(uri, Buffer.from('# 原文\r\n\r\n未改段落\r\n'));
   const document = await vscode.workspace.openTextDocument(uri);
   await vscode.window.showTextDocument(document);
   const settings = new Map<string, unknown>();
-  const context = { extensionUri: vscode.Uri.file(root), globalState: { get: (key: string, fallback: unknown) => settings.get(key) ?? fallback, update: async (key: string, value: unknown) => { settings.set(key, value); } } } as unknown as vscode.ExtensionContext;
+  const context = { extensionUri: vscode.Uri.file(root), globalStorageUri: vscode.Uri.joinPath(folder, 'storage'), globalState: { get: (key: string, fallback: unknown) => settings.get(key) ?? fallback, update: async (key: string, value: unknown) => { settings.set(key, value); } } } as unknown as vscode.ExtensionContext;
   const provider = new MDREProvider(context);
   let receive: (message: unknown) => Promise<void>;
   const messages: any[] = [];
@@ -47,6 +48,10 @@ export async function run() {
     assert(!document.getText().includes('过期修改'));
     passed.push('过期版本拒绝写入');
 
+    // 测试替身的 panel.reveal 不会真的获取焦点，先把原生撤销目标放回文档编辑器。
+    await vscode.window.showTextDocument(document, { preserveFocus: false });
+    await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+    assert.equal(vscode.window.activeTextEditor?.document.uri.toString(), uri.toString());
     await rpc('undo');
     assert.equal(document.getText(), initial.text);
     await rpc('redo');
@@ -68,13 +73,33 @@ export async function run() {
     assert(panel.webview.html.includes('Content-Security-Policy'));
     assert(panel.webview.html.includes('preventDefaultContextMenuItems'));
     passed.push('开发刷新协议、资源地址与自定义右键设置');
-    mkdirSync(path.join(root, 'output/pdf'), { recursive: true });
     const pdfPath=path.join(root,'output/pdf/vscode-host.pdf');
-    const pdf=await rpc('export_pdf',{path:pdfPath,html:'<!doctype html><html><body><h1>MDRE PDF host test</h1><p>Independent fixture.</p></body></html>'});
+    const pdf=await rpc('export_pdf',{path:pdfPath,html:readFileSync(path.join(root,'output/pdf/plugin-snapshot.html'),'utf8')});
     assert(pdf.bytes>1000);assert.equal(pdf.path,pdfPath);
     assert(readFileSync(pdfPath).subarray(0,5).equals(Buffer.from('%PDF-')));
     await assert.rejects(()=>rpc('export_pdf',{path:uri.fsPath,html:'test'}),/PDF 导出参数无效/);
     passed.push('真实 VS Code 宿主调用系统浏览器生成完整 PDF，拒绝无效输出格式');
+
+    const imageUri = vscode.Uri.joinPath(folder, '原图 (1)#%.png');
+    const imageBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jG1sAAAAASUVORK5CYII=', 'base64');
+    await vscode.workspace.fs.writeFile(imageUri, imageBytes);
+    assert.match(await rpc('read_binary', { path: imageUri.fsPath }), /^data:image\/png;base64,/);
+    assert.match(await rpc('read_document_image', { relative: path.basename(imageUri.fsPath) }), /^data:image\/png;base64,/);
+    const imageArgs = { request: { docId: 'image-test', base64: imageBytes.toString('base64'), extension: 'png' } };
+    const storedImage = await rpc('save_image', imageArgs);
+    assert.equal(storedImage.fallback, false);assert.equal(storedImage.relativePath, '');
+    assert.ok(storedImage.absolutePath.includes(path.join('storage', 'images')));
+    assert.equal((await rpc('save_image', imageArgs)).deduplicated, true);
+    const unsavedDocument = await vscode.workspace.openTextDocument({ language: 'markdown', content: '未保存文档' });
+    provider.resolveCustomTextEditor(unsavedDocument, panel);
+    const unsavedImage = await rpc('save_image', imageArgs);assert.equal(unsavedImage.fallback, false);
+    assert.match(await rpc('read_binary', { path: unsavedImage.absolutePath }), /^data:image\/png;base64,/);
+    await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(folder, 'blocked-storage'), Buffer.from('阻挡目录'));
+    const brokenContext = { ...context, globalStorageUri: vscode.Uri.joinPath(folder, 'blocked-storage') };
+    const fallbackProvider = new MDREProvider(brokenContext);fallbackProvider.resolveCustomTextEditor(document, panel);
+    const fallbackImage = await rpc('save_image', imageArgs);assert.equal(fallbackImage.fallback, true);assert.ok(fallbackImage.relativePath.startsWith('assets/'));
+    assert.match(await rpc('read_document_image', { relative: fallbackImage.relativePath }), /^data:image\/png;base64,/);
+    passed.push('绝对和相对路径读取、持久图片去重、未保存文档插图、assets 失败兜底');
 
     const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
     const extension = vscode.extensions.getExtension(`${manifest.publisher}.${manifest.name}`);
