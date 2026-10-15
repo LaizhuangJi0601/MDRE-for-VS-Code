@@ -17,7 +17,8 @@ export function setupMenus() {
   };
   const open = (menu: HTMLElement) => {
     close(); active = menu;
-    menu.querySelector<HTMLElement>('.menu-popup')!.hidden = false;
+    const popup = menu.querySelector<HTMLElement>('.menu-popup')!; popup.hidden = false;
+    if (menu.closest('#edit-bar')) { const rect = menu.getBoundingClientRect(); popup.style.position = 'fixed'; popup.style.top = `${rect.bottom + 4}px`; popup.style.left = `${Math.max(4, Math.min(rect.left, innerWidth - popup.offsetWidth - 4))}px`; }
     menu.querySelector('button')!.setAttribute('aria-expanded', 'true');
   };
   for (const menu of menus) {
@@ -38,7 +39,7 @@ export function setupMenus() {
   document.addEventListener('pointerdown', event => { if (!closestOf(event.target, '.menu')) close(); });
   document.addEventListener('keydown', event => {
     const accelerator = ['f', 'e', 'v', 'x'].indexOf(event.key.toLowerCase());
-    if (event.altKey && accelerator >= 0) { event.preventDefault(); open(menus[accelerator]); return; }
+    if (event.altKey && accelerator >= 0 && !document.getElementById('titlebar')?.hidden) { event.preventDefault(); open(menus[accelerator]); return; }
     if (!active) return;
     if (event.key === 'Escape') { const trigger = active.querySelector<HTMLButtonElement>('button')!; close(); trigger.focus(); event.preventDefault(); }
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
