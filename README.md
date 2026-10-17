@@ -1,6 +1,6 @@
 # MDRE for VS Code
 
-MDRE for VS Code 当前版本为 **0.2.2**。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
+MDRE for VS Code 当前版本为 **0.2.4**。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
 
 ## 功能
 
@@ -52,3 +52,7 @@ MDRE for VS Code 当前版本为 **0.2.2**。提供 Markdown 源码与富文本�
 ## GitHub
 
 项目地址：[MDRE for VS Code](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code)
+
+## 0.2.4
+
+汇总 0.2.2、0.2.3 的全部更新，并修复 HTML／PDF 导出对本地绝对路径图片的误判：视图预设、px／em 字号单位、表格多选批量对齐、查找上一个匹配、PDF 分页／长页导出、插件自动保存等。详见离线帮助。

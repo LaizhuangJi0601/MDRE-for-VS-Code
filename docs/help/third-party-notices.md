@@ -1,6 +1,6 @@
 # MDRE for VS Code 第三方组件声明
 
-MDRE for VS Code **0.2.2** 采用 MIT 许可证。第三方组件的版权与授权条件分别由其原始许可证规定。
+MDRE for VS Code **0.2.4** 采用 MIT 许可证。第三方组件的版权与授权条件分别由其原始许可证规定。
 
 本项目使用 CodeMirror、ProseMirror、markdown-it、KaTeX、MathLive、Mermaid、highlight.js、Lezer、entities、Playwright Core 和 VS Code Extension API，并使用 TypeScript、Vite、esbuild、tsx 与 vsce 等开发工具。感谢相关项目的作者、维护者及贡献者。
 

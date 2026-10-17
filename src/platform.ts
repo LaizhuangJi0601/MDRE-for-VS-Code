@@ -56,7 +56,14 @@ export async function flush() {
   if (failure) { const reason = failure; failure = null; throw reason; }
 }
 // 撤销、重做及保存的 RPC 回执同样是宿主确认，不能只更新界面而保留旧提交版本。
-export function acceptDocument(state: HostDocument) {
+export function acceptDocument(state: HostDocument, keepEdits = false) {
+  // 保存只确认磁盘基准；请求期间继续输入的文字不能被较旧回执覆盖。
+  if (keepEdits) {
+    if (!confirmed || state.version >= confirmed.version) confirmed = state;
+    update({ ...state, text: desired, version: Math.max(state.version, confirmed.version), dirty: desired !== state.savedText });
+    api.setState({ draft: desired, version: confirmed.version });
+    return;
+  }
   if (confirmed && state.version < confirmed.version) return;
   confirmed = state;
   desired = state.text;
@@ -85,6 +92,11 @@ window.addEventListener('message', event => {
   } else if (message.type === 'document' && confirmed) {
     const next = message.document as HostDocument;
     if (next.version <= confirmed.version && next.text !== confirmed.text) return;
+    if (pending && next.text === confirmed.text) {
+      confirmed = next;
+      update({ ...next, text: desired, dirty: desired !== next.savedText });
+      return;
+    }
     if (next.text === desired) {
       confirmed = next;
       // 保存、另存为的元数据更新不能重置光标和编辑选区。

@@ -4,7 +4,7 @@ import fitz
 
 root = Path(__file__).resolve().parents[1] / 'output' / 'pdf'
 reports = []
-for name in ['plugin.pdf']:
+for name in ['plugin.pdf', 'vscode-host.pdf', 'desktop.pdf']:
     doc = fitz.open(root / name)
     for stale in root.glob(f'{Path(name).stem}-page-*.png'):
         if int(stale.stem.rsplit('-', 1)[1]) > len(doc) and stale.resolve().parent == root.resolve():

@@ -19,7 +19,7 @@ export function pdfBrowserPath(configured?: string): string {
   if (!executable) throw new Error('PDF 导出需要 Microsoft Edge 或 Google Chrome。请安装浏览器，或设置 mdre.pdf.browserPath。');
   return executable;
 }
-export async function pdfBytes(html: string, configured?: string): Promise<Buffer> {
+export async function pdfBytes(html: string, configured?: string, layout: 'paged' | 'long' = 'paged'): Promise<Buffer> {
   const browser=await chromium.launch({executablePath:pdfBrowserPath(configured),headless:true,timeout:30000});
   try {
     const page=await browser.newPage({viewport:{width:680,height:1123}});
@@ -35,6 +35,15 @@ export async function pdfBytes(html: string, configured?: string): Promise<Buffe
       const failed=Array.from(document.fonts).filter(font=>font.status==='error');
       if (failed.length) throw new Error(`公式字体加载失败：${failed.map(font=>font.family).join(', ')}`);
     });
+    if (layout === 'long') {
+      const height = await page.evaluate(() => {
+        document.body.style.width = '180mm';
+        const bottom = document.body.getBoundingClientRect().bottom + parseFloat(getComputedStyle(document.body.lastElementChild ?? document.body).marginBottom || '0');
+        return Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight, bottom) * 25.4 / 96 + 34);
+      });
+      if (height > 5080) throw new Error('全文超过打印引擎的单页长度上限（5.08 米），请选择分页导出。');
+      await page.addStyleTag({ content: `@page { size:210mm ${Math.max(50,height)}mm; margin:15mm }` });
+    }
     const bytes=await page.pdf({format:'A4',margin:{top:'15mm',bottom:'15mm',left:'15mm',right:'15mm'},preferCSSPageSize:true,printBackground:true,displayHeaderFooter:false});
     if (!bytes.subarray(0,5).equals(Buffer.from('%PDF-')) || !bytes.includes(Buffer.from('%%EOF'))) throw new Error('打印引擎没有生成完整 PDF。');
     return bytes;
