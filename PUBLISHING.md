@@ -1,6 +1,6 @@
 # 发布到 Visual Studio Marketplace
 
-本指南说明 MDRE for VS Code 的打包与发布流程。当前项目版本为 **0.2.4**。生成 VSIX 安装包与发布到 Visual Studio Marketplace 是两项独立操作。
+本指南说明 MDRE for VS Code 的打包与发布流程。当前项目版本为 **0.2.5**。生成 VSIX 安装包与发布到 Visual Studio Marketplace 是两项独立操作。
 
 ## 发布配置
 
@@ -10,7 +10,7 @@
 | 源码仓库地址 | [MDRE-for-VS-Code](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code) | 已配置 `repository`、`bugs` 和 `homepage`。发布前确认链接可访问；公开源码不是市场发布的必要条件。 |
 | 扩展名称 | `mdre-vscode` | 首次发布前确认名称可用；发布者 ID 与扩展名称共同构成扩展安装标识。 |
 | 显示名称 | MDRE | 确认名称符合平台要求，并与说明文档一致。 |
-| 版本号 | `0.2.4` | 首次发布可使用当前版本；后续发布应递增版本号，不可覆盖已发布的同版本包。 |
+| 版本号 | `0.2.5` | 首次发布可使用当前版本；后续发布应递增版本号，不可覆盖已发布的同版本包。 |
 | 图标 | `media/icon.png` | 当前图标为 512 × 512 像素的 PNG，满足平台至少 128 × 128 像素的要求。 |
 
 ## 验证与打包
@@ -28,7 +28,7 @@ pnpm package
 pnpm exec vsce ls --no-dependencies
 ```
 
-独立插件仓库中的 `pnpm package` 生成 `mdre-vscode-0.2.4.vsix`，不执行账号登录或市场发布。发布前，可通过“扩展：从 VSIX 安装”验证实际使用效果。双端工作区使用其自身的统一发布脚本；下面市场发布示例的 `--packagePath` 请改为实际生成的 VSIX 路径。
+独立插件仓库中的 `pnpm package` 生成 `mdre-vscode-0.2.5.vsix`，不执行账号登录或市场发布。发布前，可通过“扩展：从 VSIX 安装”验证实际使用效果。双端工作区使用其自身的统一发布脚本；下面市场发布示例的 `--packagePath` 请改为实际生成的 VSIX 路径。
 
 源码与测试代码由 Git 管理；VSIX 文件内容由 `.vscodeignore` 筛选。测试输出、私人文档、缓存、访问凭据及 `node_modules/` 不应提交到公开仓库。
 
@@ -47,7 +47,7 @@ pnpm exec vsce ls --no-dependencies
 命令行发布需要发布者权限及有效的认证配置。Microsoft 当前建议采用基于 Microsoft Entra ID 的认证；完成官方指南中的身份与权限配置后，可执行：
 
 ```powershell
-pnpm exec vsce publish --azure-credential --packagePath ".\mdre-vscode-0.2.4.vsix"
+pnpm exec vsce publish --azure-credential --packagePath ".\mdre-vscode-0.2.5.vsix"
 ```
 
 该命令执行正式发布，应在版本号、发布者信息和安装包均已确认后运行。
@@ -60,9 +60,9 @@ pnpm exec vsce publish --azure-credential --packagePath ".\mdre-vscode-0.2.4.vsi
 # 将下列值替换为实际发布者 ID。
 $publisherId = "your-publisher-id"
 pnpm exec vsce login $publisherId
-pnpm exec vsce publish --packagePath ".\mdre-vscode-0.2.4.vsix"
+pnpm exec vsce publish --packagePath ".\mdre-vscode-0.2.5.vsix"
 ```
 
-后续更新应先修改版本号，例如 `0.2.4`，再完成验证、打包和发布。
+后续更新应先修改版本号，例如 `0.2.5`，再完成验证、打包和发布。
 
 认证方式与平台要求以 [VS Code 官方发布指南](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) 的现行说明为准。

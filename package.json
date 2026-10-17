@@ -2,7 +2,7 @@
   "name": "mdre-vscode",
   "displayName": "MDRE",
   "description": "Markdown 源码与富文本分屏双向编辑，保留 MDRE 工具栏及右键菜单。",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "publisher": "LaizhuangJi0601",
   "license": "MIT",
   "engines": {
