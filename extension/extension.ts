@@ -144,6 +144,34 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
         if (typeof args.url !== 'string' || !/^(https?:|mailto:)/i.test(args.url)) throw new Error('链接协议不受支持。');
         await vscode.env.openExternal(vscode.Uri.parse(args.url)); return null;
       case 'reveal_document': await vscode.commands.executeCommand('revealFileInOS', document.uri); return null;
+      // 0.2.5：图片管理双击图片名称时在资源管理器中打开图片所在目录。
+      case 'reveal_path': {
+        if (typeof args.path !== 'string' || !path.isAbsolute(args.path)) throw new Error('需要绝对文件路径。');
+        const target = vscode.Uri.file(args.path);
+        try { await vscode.commands.executeCommand('revealFileInOS', target); }
+        catch { await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(path.dirname(args.path))); }
+        return null;
+      }
+      // 0.2.5：可分享副本保存链（保存对话框 + 写 zip）。args.path 为绝对路径时跳过对话框，供自动化使用。
+      case 'save_share_copy': {
+        if (typeof args.suggested !== 'string' || typeof args.base64 !== 'string') throw new Error('可分享副本参数无效。');
+        const bytes = Buffer.from(args.base64, 'base64');
+        if (!bytes.length) throw new Error('可分享副本数据为空。');
+        if (bytes.length > 512 * 1024 * 1024) throw new Error('可分享副本超过 512 MB。');
+        if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) throw new Error('可分享副本数据不是 ZIP 文件。');
+        let target: string;
+        if (typeof args.path === 'string') {
+          if (!path.isAbsolute(args.path) || !/\.zip$/i.test(args.path)) throw new Error('导出路径需要绝对 .zip 路径。');
+          target = args.path;
+        } else {
+          const defaultUri = document.isUntitled ? undefined : vscode.Uri.joinPath(document.uri, '..', path.basename(args.suggested));
+          const picked = await vscode.window.showSaveDialog({ defaultUri, filters: { 'Zip 压缩包': ['zip'] }, saveLabel: '导出可分享副本' });
+          if (!picked) return null;
+          target = picked.fsPath;
+        }
+        await vscode.workspace.fs.writeFile(vscode.Uri.file(target), bytes);
+        return target;
+      }
       case 'open_settings_directory': await vscode.commands.executeCommand('workbench.action.openSettings', 'MDRE'); return 'VS Code 设置';
       case 'register_file_association': throw new Error('请通过 VS Code 的“重新打开编辑器方式”设置 Markdown 默认编辑器。');
       case 'pick_export': {
