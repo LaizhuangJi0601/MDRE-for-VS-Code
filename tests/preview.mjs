@@ -28,7 +28,11 @@ window.acquireVsCodeApi = () => ({ getState: () => state, setState: value => sta
       case 'redo': if(future.length) {history.push(text); text=future.pop(); version++;} value=snapshot(); break;
       case 'save': savedText = text; value = snapshot(); break;
       case 'preserve_draft': window.testPreservedDraft=args.text; value=null; break;
-      case 'save_image': value={relativePath:'assets/test.png',absolutePath:'D:/example/assets/test.png',resourceRoot:'D:/example/assets',bytes:1,hash:'test',deduplicated:false}; break;
+      case 'pick_images': value=window.testImagePaths ?? []; break;
+      case 'clipboard_image_paths': value=window.testClipboardPaths ?? []; break;
+      case 'read_binary': window.testReadImagePath=args.path; value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jG1sAAAAASUVORK5CYII='; break;
+      case 'read_image': value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jG1sAAAAASUVORK5CYII='; break;
+      case 'save_image': value={relativePath:'',absolutePath:'D:/example/images/test.png',resourceRoot:'D:/example/assets',bytes:1,hash:'test',deduplicated:false}; break;
       case 'read_document_image': value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jG1sAAAAASUVORK5CYII='; break;
       case 'clipboard_write': window.testClipboard=args.text; value=null; break;
       case 'pick_export': window.testExportPick=args; value='D:/example/test.'+args.format; break;
@@ -36,7 +40,7 @@ window.acquireVsCodeApi = () => ({ getState: () => state, setState: value => sta
       default: value = null;
     }
   } catch(reason) { error=String(reason); }
-  setTimeout(() => window.postMessage({type:'rpc-result',id:message.id,value,error}, '*'), 0);
+  setTimeout(() => window.postMessage({type:'rpc-result',id:message.id,value,error}, '*'), message.command === 'save' ? window.testSaveDelay ?? 0 : 0);
 } });
 `;
 export async function preview(port = 0, directory = root, injectMock = true) {

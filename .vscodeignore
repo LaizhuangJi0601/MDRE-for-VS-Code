@@ -27,3 +27,8 @@ BUILDINFO.json
 tsconfig*.json
 pnpm*.yaml
 .npmrc
+
+out/pdf-engine/lib/tools/**
+out/pdf-engine/lib/server/trace/viewer/**
+out/pdf-engine/lib/vite/**
+out/extension.cjs.map

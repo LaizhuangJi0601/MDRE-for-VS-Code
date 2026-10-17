@@ -157,7 +157,8 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
         await vscode.workspace.fs.writeFile(vscode.Uri.file(args.path), Buffer.from(args.html)); return null;
       case 'export_pdf': {
         if (typeof args.path!=='string' || !path.isAbsolute(args.path) || !/\.pdf$/i.test(args.path) || typeof args.html!=='string') throw new Error('PDF 导出参数无效。');
-        const bytes=await vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title:'MDRE：正在导出 PDF'},()=>pdfBytes(args.html,vscode.workspace.getConfiguration('mdre.pdf').get<string>('browserPath')));
+        if (args.layout !== undefined && !['paged', 'long'].includes(args.layout)) throw new Error('PDF 页面方式无效。');
+        const bytes=await vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title:'MDRE：正在导出 PDF'},()=>pdfBytes(args.html,vscode.workspace.getConfiguration('mdre.pdf').get<string>('browserPath'),args.layout ?? 'paged'));
         await vscode.workspace.fs.writeFile(vscode.Uri.file(args.path),bytes);
         return {path:args.path,bytes:bytes.length,engine:'Chromium / 系统浏览器'};
       }
