@@ -38,7 +38,7 @@ Current build: **0.2.6 · updata2**. See the [changelog](CHANGELOG.md) for versi
 
 | Edition | Download | Requirements |
 | --- | --- | --- |
-| VS Code extension | [Download mdre-vscode-0.2.6.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/raw/refs/heads/main/mdre-vscode-0.2.6.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
+| VS Code extension | [Download mdre-vscode-0.2.6.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases/download/v0.2.6/mdre-vscode-0.2.6.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
 
 Download the VSIX and choose **Extensions: Install from VSIX…** in VS Code, or run:
 
@@ -48,9 +48,9 @@ code --install-extension .\mdre-vscode-0.2.6.vsix --force
 
 Reload VS Code, open a `.md` or `.markdown` file, and choose **Reopen Editor With → MDRE Split Editor**. You can also run **MDRE: Open split editor** from the Command Palette. The extension initially shows rich text; the split-view button reveals source.
 
-PDF export requires a local Edge or Chrome installation. If detection fails, set `mdre.pdf.browserPath` in VS Code settings. The extension does not download Chromium.
+PDF export requires Edge or Chrome. If detection fails, set `mdre.pdf.browserPath` in VS Code settings.
 
-Word conversion is optional. Install [Pandoc](https://pandoc.org/installing.html), then use Settings → Word conversion to detect it or select its executable. On Windows, specify the full path to **`pandoc.exe`**, not its folder. Complex Word layouts may simplify; review important converted documents.
+Word import and export require [Pandoc](https://pandoc.org/installing.html). See the [user guide](docs/help/en/usage.md) for setup.
 
 Looking for the other edition? See the [Windows desktop app](https://github.com/LaizhuangJi0601/MDRE).
 

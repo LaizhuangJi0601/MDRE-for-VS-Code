@@ -1,60 +1,49 @@
-# 更新记录
+# Changelog
 
-## v0.2.6 · updata2 — 2026-10-26
+## 0.2.6
 
-English / 简体中文 UI, external Pandoc Word conversion, categorized settings and offline help, adjustable reading layout, and refined window interactions. See [version notes](docs/releases/0.2.6.md).
+- Added Word import and export with Pandoc, including common document structures and equations.
+- Added English and Simplified Chinese interfaces, categorized settings with search and preview, and searchable offline help with chapter navigation.
+- Refined settings draft recovery, dialog controls, resizing, and configurable fade transitions.
+- Added 60%–100% reading width outside A4, four text alignments, and image display preferences across layouts.
+- Improved selection-wide paragraph formatting, table menu organization, and composition input handling.
+- Reduced duplicate font assets and loaded editor resources on demand.
+- Updated extension details and version summaries in English.
 
 ## 0.2.5
 
-- 侧栏新增“图片管理”：按当前文档引用顺序列出图片名称与路径，单击条目跳转到渲染页面的图片位置，双击名称打开图片所在目录；无图片时显示空状态。
-- 导出菜单新增“导出可分享副本…”：把 Markdown 与被引用图片打包为 zip，图片路径改写为 zip 内的相对路径，原文档不变。
-- 渲染栏右键新增“复制为富文本”（Ctrl+Shift+C）：有选区复制选区，无选区复制整篇渲染内容，同时写入 `text/html` 与 `text/plain`；源码栏复制仍为纯 Markdown。
-- 源码栏与渲染栏粘贴 HTML 时自动转换为 Markdown，识别标题、列表、引用、代码、链接、表格、Word `MsoHeading*`／`mso-list` 等常用结构；无法表达的格式忽略并提示，脚本与事件属性被清洗，一次粘贴一步撤销。
-- 表格支持列宽拖拽与右键“表格”菜单中的“均分各列”“适应内容”“恢复自动列宽”、左对齐／左右居中／右对齐（GFM 表格写分隔行、HTML 表格写单元格样式）与独立的“上下居中”、合并单元格／拆分单元格、转换为 Markdown 表格；列宽写入 `<!-- mdre:table-widths: … -->` 注释，合并或上下居中的表格保存为 HTML 表格。
-- HTML／PDF 导出保留列宽、合并单元格与对齐设置。
-- 帮助文档与 README 同步更新；桌面版与插件版版本号均为 0.2.5。
+- Added an image sidebar with document-order references, navigation, and folder access.
+- Added shareable ZIP export containing Markdown and referenced local images.
+- Added rich-text copying and HTML-to-Markdown pasting for common web, Word, and spreadsheet content.
+- Added table column resizing, alignment, merging and splitting, and conversion to Markdown tables; HTML and PDF exports preserve table formatting.
 
 ## 0.2.4
 
-- 修复 HTML／PDF 导出将本地绝对路径图片（如 `<file:///F:/...>`）误判为未解析的问题，导出时改为读取并内嵌图片。
-- 汇总 0.2.3 的视图预设、px／em 字号单位、表格多选批量对齐、查找上一个匹配与 PDF 分页／长页等更新。
+- Fixed embedding of local images referenced by absolute file URLs in HTML and PDF exports.
+- Consolidated the view, typography, table selection, search, and PDF improvements from 0.2.3.
 
 ## 0.2.3
 
-- 合并重复的编辑视图，仅保留“全量编辑”；F11 返回全量编辑，兼容之前保存的视图组合。
-
-- 新增 px／em 字号单位及分组预设；右键增加标题，统一菜单顺序。
-- 修复空列表项、普通数字段落和分隔线删除的双向编辑问题。
-- 支持全表、拖选及多选单元格批量对齐。
-- 修复每 60 秒自动保存；保存状态紧随底部文件名显示。
-- 新增视图预设、自由组合恢复、默认侧栏与编辑功能区显示设置；隐藏功能区后在底部保留导出和设置入口。
-- 查找支持上一个匹配及自动滚动；PDF 新增分页／长页选择，帮助表格按空间换行。
+- Consolidated editing presets and restored saved view combinations, including the F11 focus shortcut.
+- Added px/em font-size controls, grouped context menus, and batch alignment for table selections.
+- Fixed empty-list editing, numeric paragraphs, horizontal-rule deletion, and automatic saving.
+- Improved save-status placement, previous-match search, and paged or long-page PDF export.
 
 ## 0.2.2
 
-- 使用透明的 MD 字母 Logo，补充插件市场图标。
-- 精简市场介绍，移除本地安装命令及源码开发说明，保留运行要求。
-- 添加 GitHub 项目地址与仓库元数据，更新帮助入口说明。
+- Introduced the transparent MD logo and Marketplace icon.
+- Refined the extension overview, repository metadata, and help entry points.
 
 ## 0.2.1
 
-- 插件顶部改为编辑工具栏，右侧提供设置、导出，帮助移入设置窗口。
-- 阅读模式保留置灰的编辑按钮；设置页改为响应式三列。
-- 右键菜单按文字格式、表格、块操作分组，取消悬浮块操作条。
-- 新增当前单元格左对齐、居中、右对齐及状态勾选。
-- 修复已保存主题的启动应用与显式标题锚点跳转；大纲随正文滚动高亮。
-- 分隔线直接呈现，HTML 源码编辑移至源码栏和弹窗；更新帮助与语法文档。
+- Reorganized the formatting toolbar, context menus, export controls, and responsive settings.
+- Added table-cell alignment controls and improved reading-mode feedback.
+- Fixed startup theme restoration and explicit heading-anchor navigation; the outline follows reading position.
+- Improved horizontal rules, HTML source editing, and help documentation.
 
 ## 0.2.0
 
-- 支持 Markdown 源码与富文本双向编辑，并接入 VS Code 原生保存、自动保存、撤销和重做机制。
-- 提供按类别分组的工具栏及右键菜单，支持列表、表格、代码高亮、图片、链接、文字颜色、高亮及 HTML 下划线格式。
-- 支持数学公式渲染与可视化编辑、Mermaid 图表，以及 HTML 和 PDF 导出。
-- 支持 A4 连续排版与分页排版；修复非 100% 缩放时的分页错位，分页模式每行最多显示 3 页，并提供页码信息。
-- 提供分页正文对齐、默认图片显示方式、侧栏宽度和大纲折叠设置。
-- 大纲条目保持原有高度，内容超出可用区域时可滚动查看。
-- 欢迎页保留打开文件提示，删除源码与渲染编辑模式的说明文字。
-- 统一侧栏名称与图标，调整设置弹窗的初始尺寸。
-- 整理为独立 VS Code 项目，补充扩展元数据、PNG 图标及发布指南。
-
-本文件记录版本变更；实际发布状态以 Visual Studio Marketplace 中的扩展页面为准。
+- Introduced synchronized Markdown source and rich-text editing with VS Code saving, autosave, undo, and redo.
+- Added formatting tools, tables, images, links, syntax highlighting, visual equation editing, and Mermaid diagrams.
+- Added continuous and paged A4 layouts, zoom, outline navigation, and configurable typography and image display.
+- Added HTML/PDF export and packaged the editor as a standalone VS Code extension.
