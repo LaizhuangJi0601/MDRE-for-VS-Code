@@ -38,7 +38,7 @@
 
 | 版本 | 下载 | 运行要求 |
 | --- | --- | --- |
-| VS Code 插件 | [下载 mdre-vscode-0.2.6.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/raw/refs/heads/main/mdre-vscode-0.2.6.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
+| VS Code 插件 | [下载 mdre-vscode-0.2.6.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases/download/v0.2.6/mdre-vscode-0.2.6.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
 
 下载 VSIX 后，在 VS Code 执行 **扩展：从 VSIX 安装…**，或运行：
 
@@ -48,9 +48,9 @@ code --install-extension .\mdre-vscode-0.2.6.vsix --force
 
 重新加载 VS Code，打开 `.md` 或 `.markdown` 文件，选择 **重新打开编辑器方式 → MDRE 双栏编辑器**，也可在命令面板运行 **MDRE: 打开双栏编辑器**。扩展默认仅显示富文本；工具栏的分栏按钮可显示源码。
 
-PDF 导出需要本机 Edge 或 Chrome。检测失败时，在 VS Code 设置中填写 `mdre.pdf.browserPath`；扩展不会下载 Chromium。
+PDF 导出需要本机 Edge 或 Chrome。检测失败时，在 VS Code 设置中填写 `mdre.pdf.browserPath`。
 
-Word 转换为可选功能。先安装 [Pandoc](https://pandoc.org/installing.html)，再在“设置 → Word 转换”中自动检测，或指定可执行文件的完整路径。Windows 必须具体到 `pandoc.exe`，不能只填目录。复杂 Word 版式可能简化，重要文档应核对转换结果。
+Word 导入与导出需要 [Pandoc](https://pandoc.org/installing.html)，配置方法见[使用指南](docs/help/usage.md)。
 
 另一种使用方式：[Windows 桌面版](https://github.com/LaizhuangJi0601/MDRE)。
 
