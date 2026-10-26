@@ -1,3 +1,4 @@
+# 用途：inspect-pdf 的插件宿主／界面验证。
 from pathlib import Path
 import json
 import fitz

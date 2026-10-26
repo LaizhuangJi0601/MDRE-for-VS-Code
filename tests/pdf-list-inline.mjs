@@ -1,5 +1,7 @@
+// 用途：pdf-list-inline 的插件宿主／界面验证。
 import { chromium } from 'playwright';
-import { build } from 'esbuild';
+import {createRequire as testRequire} from 'node:module';
+const {build}=testRequire(new URL('../package.json',import.meta.url))('esbuild');
 import { createRequire } from 'node:module';
 import { mkdir,writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';

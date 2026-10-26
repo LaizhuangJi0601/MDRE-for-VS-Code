@@ -1,0 +1,8 @@
+{
+  "description": "Markdown 源码与富文本分屏双向编辑，保留 MDRE 工具栏及右键菜单。",
+  "config.pdfBrowser": "PDF 导出使用的 Edge/Chrome 可执行文件路径；留空自动检测系统浏览器。",
+  "command.open": "MDRE: 打开双栏编辑器",
+  "command.new": "MDRE: 新建 Markdown 文档",
+  "command.reload": "MDRE: 刷新编辑界面",
+  "editor.name": "MDRE 双栏编辑器"
+}

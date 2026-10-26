@@ -1,5 +1,9 @@
 # 更新记录
 
+## v0.2.6 · updata2 — 2026-10-26
+
+English / 简体中文 UI, external Pandoc Word conversion, categorized settings and offline help, adjustable reading layout, and refined window interactions. See [version notes](docs/releases/0.2.6.md).
+
 ## 0.2.5
 
 - 侧栏新增“图片管理”：按当前文档引用顺序列出图片名称与路径，单击条目跳转到渲染页面的图片位置，双击名称打开图片所在目录；无图片时显示空状态。

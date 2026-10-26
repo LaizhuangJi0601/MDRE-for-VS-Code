@@ -1,3 +1,4 @@
+// 用途：iframe-math 的插件宿主／界面验证。
 import { chromium } from 'playwright';
 import { preview } from './preview.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';

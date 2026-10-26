@@ -1,8 +1,8 @@
 {
   "name": "mdre-vscode",
   "displayName": "MDRE",
-  "description": "Markdown 源码与富文本分屏双向编辑，保留 MDRE 工具栏及右键菜单。",
-  "version": "0.2.5",
+  "description": "%description%",
+  "version": "0.2.6",
   "publisher": "LaizhuangJi0601",
   "license": "MIT",
   "engines": {
@@ -22,28 +22,28 @@
         "mdre.pdf.browserPath": {
           "type": "string",
           "default": "",
-          "description": "PDF 导出使用的 Edge/Chrome 可执行文件路径；留空自动检测系统浏览器。"
+          "description": "%config.pdfBrowser%"
         }
       }
     },
     "commands": [
       {
         "command": "mdre.open",
-        "title": "MDRE: 打开双栏编辑器"
+        "title": "%command.open%"
       },
       {
         "command": "mdre.new",
-        "title": "MDRE: 新建 Markdown 文档"
+        "title": "%command.new%"
       },
       {
         "command": "mdre.reloadEditor",
-        "title": "MDRE: 刷新编辑界面"
+        "title": "%command.reload%"
       }
     ],
     "customEditors": [
       {
         "viewType": "mdre.editor",
-        "displayName": "MDRE 双栏编辑器",
+        "displayName": "%editor.name%",
         "selector": [
           {
             "filenamePattern": "*.md"
@@ -90,7 +90,7 @@
     "build": "pnpm check && node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
     "dev": "node scripts/develop.mjs",
-    "test": "pnpm test:ui && pnpm test:host",
+    "test": "pnpm test:ui && pnpm test:pdf && pnpm test:host",
     "test:ui": "node tests/webview.mjs",
     "test:host": "node tests/host.mjs",
     "test:watch": "node tests/watch.mjs",

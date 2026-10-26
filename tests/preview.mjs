@@ -1,3 +1,4 @@
+// 用途：preview 的插件宿主／界面验证。
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -10,6 +11,7 @@ let version = 1, savedText = text, history = [], future = [], state;
 let settings = JSON.parse(localStorage.getItem('mdre-test-settings') || '{}');
 const snapshot = () => ({ text, version, dirty:text !== savedText, savedText, path:'D:/example/document.md', title:'document.md' });
 window.testHost = { snapshot, external(value) { text = value; version++; window.postMessage({type:'document',document:snapshot()}, '*'); } };
+window.addEventListener('storage',event=>{if(event.key==='mdre-test-settings'){settings=JSON.parse(event.newValue||'{}');window.postMessage({type:'settings-changed'},'*');}});
 window.acquireVsCodeApi = () => ({ getState: () => state, setState: value => state = value, postMessage: message => {
   if(message.type === 'reload-ready') { window.testReloaded = true; return; }
   let value, error;
@@ -17,8 +19,14 @@ window.acquireVsCodeApi = () => ({ getState: () => state, setState: value => sta
     const args = message.args;
     switch(message.command) {
       case 'document': value = snapshot(); break;
-      case 'read_settings': value = settings; break;
-      case 'write_settings': settings = args.settings; localStorage.setItem('mdre-test-settings', JSON.stringify(settings)); value = null; break;
+      case 'read_settings': value = JSON.parse(localStorage.getItem('mdre-test-settings')||'{}'); break;
+      case 'write_settings': settings = {...JSON.parse(localStorage.getItem('mdre-test-settings')||'{}'),...args.patch}; localStorage.setItem('mdre-test-settings', JSON.stringify(settings)); localStorage.removeItem('mdre-test-settings-draft'); value = null; break;
+      case 'open_settings_window': window.open('/settings.html','mdre-settings');value=null;break;
+      case 'close_settings': localStorage.removeItem('mdre-test-settings-draft');window.close();value=null;break;
+      case 'settings_draft': localStorage.setItem('mdre-test-settings-draft',JSON.stringify(args.draft));value=null;break;
+      case 'read_settings_draft': value=JSON.parse(localStorage.getItem('mdre-test-settings-draft')||'null');break;
+      case 'detect_pandoc': value={path:'D:/test-only/pandoc.exe',version:'pandoc 2.12 (simulated host)'};break;
+      case 'open_external': window.testExternalUrl=args.url;value=null;break;
       case 'edit':
         if(args.version !== version) { value = {...snapshot(),accepted:false}; break; }
         history.push(text); future = [];
@@ -56,7 +64,7 @@ export async function preview(port = 0, directory = root, injectMock = true) {
       const file = path.resolve(directory, '.' + (pathname === '/' ? '/index.html' : pathname));
       if (!file.startsWith(directory + path.sep)) { response.writeHead(403).end(); return; }
       let content = await readFile(file);
-      if (injectMock && file.endsWith('index.html')) content = Buffer.from(content.toString().replace('<head>', `<head><script>${mock}</script>`));
+      if (injectMock && file.endsWith('.html')) content = Buffer.from(content.toString().replace('<head>', `<head><script>${mock}</script>`));
       const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml' }[path.extname(file)] ?? 'application/octet-stream';
       response.writeHead(200, { 'Content-Type': mime }); response.end(content);
     } catch { response.writeHead(404).end(); }

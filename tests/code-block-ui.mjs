@@ -1,11 +1,12 @@
+// 用途：code-block-ui 的插件宿主／界面验证。
 import { chromium } from 'playwright';
 import { preview } from './preview.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
-const desktop = process.argv.includes('--desktop');
-const directory = desktop ? fileURLToPath(new URL('../../dist/', import.meta.url)) : undefined;
+const desktop = false;
+const directory = undefined;
 const { server, url } = await preview(0, directory, !desktop);
 const browser = await chromium.launch({ channel:'msedge',headless:true });
 const page = await browser.newPage({ viewport:{width:1440,height:1000} });
@@ -34,7 +35,8 @@ try {
   }
   async function remove() {
     await page.locator('#render .code-header').click({button:'right'});
-    await page.locator('#editor-context [data-context="delete-block"]').click();
+    await page.locator('#editor-context [data-context="block-operations"]').click();
+    await page.locator('.context-submenu:not([hidden]) [data-context="block-delete"]').click();
     await page.waitForFunction(() => !window.mdre.render.dom.querySelector('.code-block'));
     assert.equal(await page.locator('#error').textContent(),'');
   }

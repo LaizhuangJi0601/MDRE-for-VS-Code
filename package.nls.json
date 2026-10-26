@@ -1,0 +1,8 @@
+{
+  "description": "Two-way Markdown source and rich-text editing with a complete formatting toolbar.",
+  "config.pdfBrowser": "Edge/Chrome executable path for PDF export. Leave empty to detect automatically.",
+  "command.open": "MDRE: Open split editor",
+  "command.new": "MDRE: New Markdown document",
+  "command.reload": "MDRE: Reload editor",
+  "editor.name": "MDRE Split Editor"
+}

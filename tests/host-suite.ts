@@ -1,3 +1,4 @@
+// 用途：host-suite 的插件宿主／界面验证。
 import * as vscode from 'vscode';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
@@ -100,6 +101,32 @@ export async function run() {
     const fallbackImage = await rpc('save_image', imageArgs);assert.equal(fallbackImage.fallback, true);assert.ok(fallbackImage.relativePath.startsWith('assets/'));
     assert.match(await rpc('read_document_image', { relative: fallbackImage.relativePath }), /^data:image\/png;base64,/);
     passed.push('绝对和相对路径读取、持久图片去重、未保存文档插图、assets 失败兜底');
+
+    const pandoc=await rpc('detect_pandoc',{tool:''});assert.match(pandoc.version,/pandoc/);
+    await assert.rejects(()=>rpc('detect_pandoc',{tool:path.dirname(pandoc.path)}),/完整/);
+    const wordPath=path.join(root,'.tmp/host',`word-${Date.now()}.docx`),markdownPath=wordPath+'.md';
+    await rpc('word_convert',{direction:'export',tool:pandoc.path,path:wordPath,html:'<h1>Word 宿主验收</h1><p><strong>中文内容</strong> <math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></math></p>'});
+    await rpc('word_convert',{direction:'import',tool:pandoc.path,path:markdownPath,input:wordPath});
+    const wordText=readFileSync(markdownPath,'utf8');assert(wordText.includes('中文内容'));assert(wordText.includes('x^{2}')||wordText.includes('x^2'));
+    assert(/\$[^$]*x[^$]*\$/.test(wordText),'公式必须还原为 Markdown 公式，不能只有字面文本');
+    await assert.rejects(()=>rpc('word_convert',{direction:'import',tool:pandoc.path,path:markdownPath,input:wordPath}),/覆盖/);
+    passed.push('真实 VS Code 宿主检测外部 Pandoc 并完成含公式 DOCX 往返，拒绝覆盖 Markdown');
+    await rpc('open_settings_window');
+    for(let i=0;i<40&&!vscode.window.tabGroups.all.some(group=>group.tabs.some(tab=>tab.label==='MDRE 设置'));i++)await new Promise(resolve=>setTimeout(resolve,50));
+    assert(vscode.window.tabGroups.all.some(group=>group.tabs.some(tab=>tab.label==='MDRE 设置')));
+    passed.push('真实 VS Code 可打开独立设置标签页');
+    // 正常退出提交有效草稿；无效草稿继续保留，绝不能被校验器静默改成默认值。
+    settings.set('mdre.settingsDraft',{valid:true,patch:{motion:'off',font_size:19},values:{motion:'off',font_size:'19'}});
+    await provider.shutdownSettings();
+    assert.equal((settings.get('mdre.settings') as any).motion,'off');
+    assert.equal((settings.get('mdre.settings') as any).font_size,19);
+    assert.equal(settings.get('mdre.settingsDraft'),undefined);
+    settings.set('mdre.settingsDraft',{valid:false,patch:{font_size:99},values:{font_size:'99'}});
+    await provider.recoverSettingsDraft();
+    assert.equal((settings.get('mdre.settings') as any).font_size,19);
+    assert.equal((settings.get('mdre.settingsDraft') as any).values.font_size,'99');
+    settings.delete('mdre.settingsDraft');
+    passed.push('插件宿主退出保存有效设置草稿，无效草稿保留且不覆盖已保存值');
 
     const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
     const extension = vscode.extensions.getExtension(`${manifest.publisher}.${manifest.name}`);
