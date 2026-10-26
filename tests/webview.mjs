@@ -1,3 +1,4 @@
+// 用途：webview 的插件宿主／界面验证。
 import { chromium } from 'playwright';
 import { preview } from './preview.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -29,6 +30,7 @@ try {
   assert(wide.width > (await page.locator('#render-pane').boundingBox()).width);
   const beforeToggle = await page.evaluate(() => window.testHost.snapshot());
   await page.locator('#source-toggle').click();
+  await page.locator('#source-pane').waitFor({state:'hidden'});
   assert.equal(await page.locator('#source-pane').isVisible(), false);
   assert.equal(await page.locator('#source-toggle').getAttribute('aria-label'), '显示源码');
   assert.deepEqual(await page.evaluate(() => window.testHost.snapshot()), beforeToggle);
@@ -71,7 +73,8 @@ try {
   passed.push('格式工具栏编辑及宿主统一撤销/重做');
 
   await page.locator('#render td').first().click({ button: 'right' });
-  await page.locator('#editor-context [data-context="row-below"]').click();
+  await page.locator('#editor-context [data-context="table-operations"]').click();
+  await page.locator('.context-submenu:not([hidden]) [data-context="row-below"]').click();
   await page.waitForFunction(() => window.mdre.render.dom.querySelectorAll('tr').length === 3 && window.testHost.snapshot().text === window.mdre.workspace.active.source);
   passed.push('原右键菜单插入表格行，双栏与宿主同步');
 
@@ -91,28 +94,31 @@ try {
   passed.push('开发刷新前完成文档提交');
 
   // 默认布局保存后在下一次打开生效，取消设置不改写持久化配置。
+  let settingsPage;
   async function settingsDialog() {
-    await page.locator('#settings-menu').click();
+    const popup=page.waitForEvent('popup');
     await page.locator('#settings-open').click();
-    await page.locator('#settings-dialog[open]').waitFor();
+    settingsPage=await popup;
+    await settingsPage.locator('#settings-dialog[open]').waitFor();
+    await settingsPage.locator('.settings-navigation button').filter({hasText:'编辑与文件'}).click();
   }
   await settingsDialog();
-  await page.locator('[name="show_source"]').selectOption('true');
-  await page.locator('#settings-save').click();
-  await page.waitForFunction(() => !document.getElementById('settings-dialog').open);
+  await settingsPage.locator('[name="show_source"]').selectOption('true');
+  await settingsPage.locator('#settings-save').click();
+  await page.waitForFunction(() => JSON.parse(localStorage.getItem('mdre-test-settings')).show_source===true);
   await page.reload();
   await page.waitForFunction(() => window.mdre?.workspace.active?.source.includes('双栏编辑验收'));
   assert.equal(await page.locator('#source-pane').isVisible(), true);
   await settingsDialog();
-  await page.locator('[name="show_source"]').selectOption('false');
-  await page.locator('#settings-save').click();
-  await page.waitForFunction(() => !document.getElementById('settings-dialog').open && document.getElementById('source-pane').hidden);
+  await settingsPage.locator('[name="show_source"]').selectOption('false');
+  await settingsPage.locator('#settings-save').click();
+  await page.waitForFunction(() => document.getElementById('source-pane').hidden);
   await page.reload();
   await page.waitForFunction(() => window.mdre?.workspace.active?.source.includes('双栏编辑验收'));
   assert.equal(await page.locator('#source-pane').isVisible(), false);
   await settingsDialog();
-  await page.locator('[name="show_source"]').selectOption('true');
-  await page.locator('#settings-cancel').click();
+  await settingsPage.locator('[name="show_source"]').selectOption('true');
+  await settingsPage.locator('#settings-cancel').click();
   assert.equal(await page.locator('#source-pane').isVisible(), false);
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('mdre-test-settings')).show_source), false);
   passed.push('设置默认显示/隐藏源码，保存后重新打开生效，取消不改写默认设置');
@@ -135,6 +141,8 @@ try {
   await writeFile('output/playwright/results.json', JSON.stringify({ passed, errors }, null, 2));
   console.log(JSON.stringify({ passed, errors }, null, 2));
 } catch (reason) {
+  await mkdir('output/playwright', { recursive: true });
+  await page.screenshot({path:'output/playwright/webview-failure.png'});
   console.error(await page.evaluate(() => ({ source:window.mdre?.source.state.doc.toString(), model:window.mdre?.workspace.active?.source, render:window.mdre?.render.dom.textContent, host:window.testHost?.snapshot(), error:document.getElementById('error')?.textContent, active:document.activeElement?.outerHTML.slice(0,200) })));
   console.error(errors);
   throw reason;

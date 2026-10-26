@@ -1,8 +1,10 @@
-import { build } from 'esbuild';
+import { vscodeExecutable } from '../scripts/vscode-path.mjs';
+// 用途：host 的插件宿主／界面验证。
+import {createRequire as testRequire} from 'node:module';
+const {build}=testRequire(new URL('../package.json',import.meta.url))('esbuild');
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
-import { vscodeExecutable } from '../scripts/vscode-path.mjs';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

@@ -1,3 +1,4 @@
+// 用途：code-paragraph.test 的插件宿主／界面验证。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Transform } from 'prosemirror-transform';

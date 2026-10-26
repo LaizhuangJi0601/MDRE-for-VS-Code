@@ -1,3 +1,4 @@
+// 用途：insert-blocks-ui 的插件宿主／界面验证。
 import { chromium } from 'playwright';
 import { preview } from './preview.mjs';
 import assert from 'node:assert/strict';

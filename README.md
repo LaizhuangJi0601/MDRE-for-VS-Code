@@ -1,69 +1,79 @@
-# MDRE for VS Code
+<p align="center"><img src="media/icon.png" alt="MDRE" width="104"></p>
 
-MDRE for VS Code 当前版本为 **0.2.5**。提供 Markdown 源码与富文本的双向编辑功能，可直接修改富文本，也可显示源码栏进行编辑；两种视图保持同步。
+<h1 align="center">MDRE for VS Code</h1>
 
-## 功能
+<p align="center"><strong>One Markdown document. Two ways to edit.</strong><br>Synchronized Markdown source and rich-text editing inside VS Code.<br><sub>VS Code 1.95+ · English / 简体中文</sub></p>
 
-- **双向编辑**：Markdown 源码与富文本编辑器同步；保存、自动保存、撤销和重做使用 VS Code 原生文档机制。
-- **格式与结构**：单行工具栏按类别分组，窄窗口可横向滚动；工具栏和右键菜单支持标题、列表、引用、链接、表格、下划线、颜色、高亮、上下标等。下划线使用通用 HTML `<u>内容</u>`。
-- **公式与图表**：KaTeX 渲染数学公式，MathLive 可视化编辑；支持 Mermaid 图表。
-- **A4 阅读与编辑**：连续或分页排版，Ctrl+滚轮缩放 25%–250%；分页按可用宽度每行显示 1–3 页，并显示页码。
-- **侧栏与大纲**：侧栏提供“图片管理”和“大纲导航”；图片管理按引用顺序列出当前文档的图片名称与路径，可单击跳转、双击打开所在目录；大纲按标题层级导航，内容超出可用区域时可滚动查看。
-- **可配置排版**：字体、字号、行距、主题、分页正文对齐、图片显示方式和侧栏宽度。图片默认适应正文宽度，代码块支持浅色或深色主题。
-- **表格操作**：列宽拖拽与菜单调整、水平对齐与上下居中、合并／拆分单元格、转换为 Markdown 表格；合并或上下居中的表格保存为 HTML 表格。
-- **剪贴板互通**：渲染内容可复制为富文本（Ctrl+Shift+C）；粘贴网页或 Word 的 HTML 时自动转换为 Markdown，一次粘贴一步撤销。
-- **HTML 与 PDF 导出**：嵌入本地图片及公式字体；PDF 导出调用系统 Edge 或 Chrome。可导出包含文档与图片的可分享 zip 副本。
+<p align="center">
+  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.6-2878d5" alt="Version 0.2.6"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b8c70" alt="MIT license"></a>
+  <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS_Code-1.95%2B-667085" alt="VS Code 1.95+"></a>
+</p>
 
-## 打开 Markdown
+<p align="center"><a href="#features">Features</a> · <a href="#download-and-installation">Download and installation</a> · <a href="#development">Development</a> · <a href="#contributing">Contributing</a> · <a href="#license">License</a></p>
 
-1. 打开 `.md` 或 `.markdown` 文件。
-2. 在命令面板运行 **MDRE: 打开双栏编辑器**，或右键文件选择同名命令。
-3. 也可以使用 **重新打开编辑器方式 → MDRE 双栏编辑器**。
+<p align="center"><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
 
-本扩展保留 VS Code 原生 Markdown 编辑器；默认不将 MDRE 设为 Markdown 文件的默认编辑器。
+## Screenshot
 
-## 常用操作
+![MDRE for VS Code with synchronized Markdown source and rich-text views](media/screenshots/editor.png)
 
-| 操作 | 方法 |
-| --- | --- |
-| 显示／隐藏源码 | 视图组中的分栏图标 |
-| 收起／展开侧栏 | 视图组中的侧栏图标，或 Ctrl+Shift+O |
-| 图片管理 | 侧栏“图片管理”：单击条目跳转到图片，双击名称打开所在目录 |
-| 大纲导航 | 点击标题跳转；条目较多时滚动查看，标题旁箭头折叠／展开列表 |
-| A4 与分页 | A4 图标；设置 → 纸张与图片 → A4 排版方式 |
-| 纸张缩放 | 在渲染栏按住 Ctrl 并滚动鼠标滚轮 |
-| 下划线 | 字体组 U 按钮、Ctrl+U 或右键菜单 |
-| 复制为富文本 | 渲染栏右键“复制为富文本”，或 Ctrl+Shift+C |
-| 粘贴网页或 Word 内容 | 在源码栏或渲染栏 Ctrl+V，HTML 会自动转换为 Markdown |
-| 表格列宽与合并 | 拖动列边框调整列宽；右键“表格”菜单设置列宽、对齐、合并／拆分 |
-| 导出可分享副本 | 导出菜单“导出可分享副本…”，生成含文档与图片的 zip |
-| 编辑公式 | 双击公式 |
-| 编辑 Mermaid | 双击图表并修改源码 |
-| 帮助 | 设置 → 帮助 |
+## Features
 
-扩展默认隐藏源码栏；设置中的“默认显示源码栏”可改变这一行为。
-插入的图片保存至已保存文档所在目录的 `assets/`；使用前请先保存 Markdown 文件。文件夹、文件标签和启动恢复使用 VS Code 原生工作区机制。详细操作方法可在“设置 → 帮助”中查看。
+- **Edit source and rich text together.** Keep both panes synchronized, or work in rich text alone. Format headings, lists, links, and text through the toolbar and context menus.
+- **Write equations, diagrams, and code.** Render math with KaTeX, edit equations visually with MathLive, and use Mermaid diagrams, syntax highlighting, and code block themes.
+- **Choose a reading layout.** Use continuous or paged A4 views with 25%–250% zoom. Outside A4, adjust reading width from 60% to 100% and choose one of four text alignments.
+- **Work with tables and images.** Resize columns, align or merge cells, and split merged cells. Browse image references in document order and jump to their locations.
+- **Export and exchange content.** Export HTML, PDF, or a ZIP containing Markdown and local images. Copy rich text and convert pasted HTML into Markdown.
+- **Convert Word documents.** Import and export `.docx` through a separately installed Pandoc, including common document structures and equations.
+- **Set up your workspace.** Choose light or dark themes, English or Simplified Chinese, view presets, categorized settings, and searchable offline help with chapter navigation.
 
-## PDF 导出
+Files, tabs, saving, and undo/redo use VS Code’s document model. MDRE is an optional Markdown editor, alongside VS Code’s built-in editor.
 
-需要系统安装 Microsoft Edge 或 Google Chrome。自动检测失败时，在 VS Code 设置中填写 `mdre.pdf.browserPath`。扩展不会下载 Chromium。
+Editing and preview run locally. Editor resources, equation fonts, and help are bundled; remote images and external links depend on network access. See the [user guide](docs/help/en/usage.md) and [syntax reference](docs/help/en/syntax.md) for supported behavior.
 
-## 运行要求
+## Download and installation
 
-扩展要求 VS Code **1.95.0 或更高版本**。
+Current build: **0.2.6 · updata2**. See the [changelog](CHANGELOG.md) for version notes.
 
-## 许可证
+| Edition | Download | Requirements |
+| --- | --- | --- |
+| VS Code extension | [Download mdre-vscode-0.2.6.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/raw/refs/heads/main/mdre-vscode-0.2.6.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
 
-本项目使用 MIT 许可证。第三方组件及字体的版权和授权文本随包保留；在“设置 → 帮助”中选择“MDRE声明”，可查看清单和原文。
+Download the VSIX and choose **Extensions: Install from VSIX…** in VS Code, or run:
 
-## GitHub
+```powershell
+code --install-extension .\mdre-vscode-0.2.6.vsix --force
+```
 
-项目地址：[MDRE for VS Code](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code)
+Reload VS Code, open a `.md` or `.markdown` file, and choose **Reopen Editor With → MDRE Split Editor**. You can also run **MDRE: Open split editor** from the Command Palette. The extension initially shows rich text; the split-view button reveals source.
 
-## 0.2.5
+PDF export requires a local Edge or Chrome installation. If detection fails, set `mdre.pdf.browserPath` in VS Code settings. The extension does not download Chromium.
 
-新增图片管理侧栏、可分享副本（文档与图片打包为 zip）、复制为富文本（Ctrl+Shift+C）与 HTML→Markdown 粘贴；表格支持列宽拖拽与菜单、上下居中、合并／拆分单元格、转换为 Markdown 表格及列宽注释。详见离线帮助。
+Word conversion is optional. Install [Pandoc](https://pandoc.org/installing.html), then use Settings → Word conversion to detect it or select its executable. On Windows, specify the full path to **`pandoc.exe`**, not its folder. Complex Word layouts may simplify; review important converted documents.
 
-## 0.2.4
+Looking for the other edition? See the [Windows desktop app](https://github.com/LaizhuangJi0601/MDRE).
 
-汇总 0.2.2、0.2.3 的全部更新，并修复 HTML／PDF 导出对本地绝对路径图片的误判：视图预设、px／em 字号单位、表格多选批量对齐、查找上一个匹配、PDF 分页／长页导出、插件自动保存等。详见离线帮助。
+## Development
+
+Use Node.js 24 LTS and pnpm 12.x, with VS Code for extension debugging.
+
+```powershell
+git clone https://github.com/LaizhuangJi0601/MDRE-for-VS-Code.git
+cd MDRE-for-VS-Code
+pnpm install --frozen-lockfile
+pnpm build
+pnpm package
+```
+
+`pnpm build` builds the extension host and webview; `pnpm package` creates the VSIX. Use `pnpm dev` for an Extension Development Host. See [development notes](docs/development.md) for checks and tooling.
+
+## Contributing
+
+Bug reports, suggestions, and pull requests are welcome. Use [Issues](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/issues) with the app version, reproduction steps, and a small Markdown example; include a screenshot for visual issues. Keep the English and Chinese documentation aligned when changing user-facing behavior.
+
+## License
+
+MDRE is released under the [MIT License](LICENSE). It builds on projects including [Tauri](https://tauri.app/), [CodeMirror](https://codemirror.net/), [ProseMirror](https://prosemirror.net/), [markdown-it](https://github.com/markdown-it/markdown-it), [KaTeX](https://katex.org/), [MathLive](https://mathlive.io/), [Mermaid](https://mermaid.js.org/), and [highlight.js](https://highlightjs.org/).
+
+Third-party copyright and usage terms remain governed by their original licenses. See [notices and licenses](docs/help/en/notices.md).

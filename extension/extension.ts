@@ -1,3 +1,7 @@
+import {translate} from '../src/i18n/strings';
+let hostLanguage='zh-CN';
+const ui=(text:string)=>translate(text,hostLanguage);
+import { detectPandoc, convertWord } from './pandoc';
 import * as vscode from 'vscode';
 import { readFileSync } from 'node:fs';
 import { createHash, randomBytes } from 'node:crypto';
@@ -8,11 +12,17 @@ import { readImage, clipboardImagePaths } from './image-files';
 
 const viewType = 'mdre.editor';
 type PanelRecord = { document: vscode.TextDocument; panel: vscode.WebviewPanel; editing: boolean; savedText: string };
+type SettingsDraft = {patch: Record<string,unknown>; values: Record<string,string>; valid:boolean};
+let activeProvider: MDREProvider | undefined;
+export async function deactivate() { await activeProvider?.shutdownSettings(); }
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  hostLanguage=context.globalState.get<Record<string,string>>('mdre.settings',{}).language??'zh-CN';
   const provider = new MDREProvider(context);
+  activeProvider=provider;
+  await provider.recoverSettingsDraft();
   context.subscriptions.push(vscode.window.registerCustomEditorProvider(viewType, provider, {
-    webviewOptions: { retainContextWhenHidden: true }, supportsMultipleEditorsPerDocument: true,
+    webviewOptions: { retainContextWhenHidden: true }, supportsMultipleEditorsPerDocument: false,
   }));
   context.subscriptions.push(vscode.commands.registerCommand('mdre.open', async (uri?: vscode.Uri) => {
     const target = uri ?? vscode.window.activeTextEditor?.document.uri ?? provider.activeDocument?.uri;
@@ -36,6 +46,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 export class MDREProvider implements vscode.CustomTextEditorProvider {
   private records = new Set<PanelRecord>();
+  private settingsPanel: vscode.WebviewPanel | undefined;
+  private settingsWrites: Promise<unknown> = Promise.resolve();
+  private shuttingDown=false;
+  private queueSettings<T>(operation:()=>Promise<T>):Promise<T> {
+    const result=this.settingsWrites.then(operation);this.settingsWrites=result.catch(()=>{});return result;
+  }
+  async recoverSettingsDraft() {
+    await this.queueSettings(async()=>{
+      const draft=this.context.globalState.get<SettingsDraft>('mdre.settingsDraft');
+      if(!draft?.valid)return;
+      const current=this.context.globalState.get<Record<string,unknown>>('mdre.settings',{});
+      await this.context.globalState.update('mdre.settings',{...current,...draft.patch});
+      await this.context.globalState.update('mdre.settingsDraft',undefined);
+    });
+  }
+  async shutdownSettings() { this.shuttingDown=true; await this.settingsWrites;await this.recoverSettingsDraft(); }
   constructor(private context: vscode.ExtensionContext) {}
   get activeDocument() { return [...this.records].find(record => record.panel.active)?.document; }
   async newDocument() {
@@ -58,14 +84,36 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
     });
     panel.onDidDispose(() => { listener.dispose(); this.records.delete(record); });
   }
-  private prepare(panel: vscode.WebviewPanel, document: vscode.TextDocument) {
+  private openSettings(record: PanelRecord) {
+    if(this.settingsPanel){this.settingsPanel.reveal();return;}
+    const panel=vscode.window.createWebviewPanel('mdre.settings',ui('MDRE 设置'),vscode.ViewColumn.Beside,{enableScripts:true,retainContextWhenHidden:true});
+    this.settingsPanel=panel;this.prepare(panel,record.document,'settings.html');
+    const bridge={...record,panel};
+    const listener=panel.webview.onDidReceiveMessage(async message=>{
+      if(message.type!=='rpc'||!Number.isInteger(message.id))return;
+      try{
+        if(message.command==='settings_draft'){
+          const draft=message.args?.draft as SettingsDraft;
+          if(!draft || typeof draft.valid!=='boolean'||!draft.patch||!draft.values||JSON.stringify(draft).length>65536)throw new Error(ui('设置草稿无效。'));
+          await this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',draft);});
+          await panel.webview.postMessage({type:'rpc-result',id:message.id,value:null});return;
+        }
+        if(message.command==='read_settings_draft'){await panel.webview.postMessage({type:'rpc-result',id:message.id,value:this.context.globalState.get('mdre.settingsDraft',null)});return;}
+        if(message.command==='close_settings'){await this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',undefined);});panel.dispose();return;}
+        if(!['read_settings','write_settings','detect_pandoc','pick_word','open_external','open_settings_directory'].includes(message.command))throw new Error(ui('设置页不支持该操作。'));
+        const value=await this.command(bridge,message.command,message.args??{});await panel.webview.postMessage({type:'rpc-result',id:message.id,value});
+      }catch(error){await panel.webview.postMessage({type:'rpc-result',id:message.id,error:String(error)});}
+    });
+    panel.onDidDispose(()=>{listener.dispose();this.settingsPanel=undefined;if(!this.shuttingDown)void this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',undefined);}).catch(reason=>vscode.window.showErrorMessage(`设置草稿清理失败：${reason}`));});
+  }
+  private prepare(panel: vscode.WebviewPanel, document: vscode.TextDocument, entry='index.html') {
     const folder = vscode.Uri.joinPath(document.uri, '..');
     panel.webview.options = {
       enableScripts: true,
       localResourceRoots: [this.context.extensionUri, folder, ...(vscode.workspace.workspaceFolders?.map(item => item.uri) ?? [])],
     };
     const root = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview');
-    let html = readFileSync(vscode.Uri.joinPath(root, 'index.html').fsPath, 'utf8');
+    let html = readFileSync(vscode.Uri.joinPath(root, entry).fsPath, 'utf8');
     const nonce = randomBytes(16).toString('hex');
     html = html.replace(/(src|href)="(\.\/[^\"]+)"/g, (_match, attribute, value) => `${attribute}="${panel.webview.asWebviewUri(vscode.Uri.joinPath(root, value.slice(2)))}"`);
     html = html.replace(/<script /g, `<script nonce="${nonce}" `);
@@ -80,7 +128,7 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
     const document = record.document;
     return { text: document.getText(), version: document.version, dirty: document.isDirty,
       savedText: record.savedText, path: document.isUntitled ? null : document.uri.fsPath,
-      title: document.isUntitled ? '未命名.md' : path.basename(document.uri.fsPath) };
+      title: document.isUntitled ? ui('未命名.md') : path.basename(document.uri.fsPath) };
   }
   changed(document: vscode.TextDocument) {
     for (const record of this.records) if (record.document.uri.toString() === document.uri.toString() && !record.editing)
@@ -102,9 +150,9 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
     switch (command) {
       case 'document': return this.state(record);
       case 'edit': {
-        if (!Number.isInteger(args.version) || !Number.isInteger(args.from) || !Number.isInteger(args.to) || typeof args.insert !== 'string') throw new Error('编辑补丁参数无效。');
+        if (!Number.isInteger(args.version) || !Number.isInteger(args.from) || !Number.isInteger(args.to) || typeof args.insert !== 'string') throw new Error(ui('编辑补丁参数无效。'));
         if (args.version !== document.version) return { ...this.state(record), accepted: false };
-        if (args.from < 0 || args.to < args.from || args.to > document.getText().length) throw new Error('编辑范围超出文档。');
+        if (args.from < 0 || args.to < args.from || args.to > document.getText().length) throw new Error(ui('编辑范围超出文档。'));
         const edit = new vscode.WorkspaceEdit();
         edit.replace(document.uri, new vscode.Range(document.positionAt(args.from), document.positionAt(args.to)), args.insert);
         record.editing = true;
@@ -118,7 +166,7 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
         return this.state(record);
       case 'save':
         if (document.isUntitled) { record.panel.reveal(); await vscode.commands.executeCommand('workbench.action.files.save'); }
-        else if (!(await document.save())) throw new Error('保存未完成。');
+        else if (!(await document.save())) throw new Error(ui('保存未完成。'));
         return this.state(record);
       case 'save_as': record.panel.reveal(); await vscode.commands.executeCommand('workbench.action.files.saveAs'); return null;
       case 'close': record.panel.reveal(); await vscode.commands.executeCommand('workbench.action.closeActiveEditor'); return null;
@@ -129,24 +177,45 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
         return null;
       }
       case 'preserve_draft': {
-        if (typeof args.text !== 'string') throw new Error('草稿内容无效。');
+        if (typeof args.text !== 'string') throw new Error(ui('草稿内容无效。'));
         const draft = await vscode.workspace.openTextDocument({ language: 'markdown', content: args.text });
         await vscode.window.showTextDocument(draft, { preview: false, preserveFocus: true });
         return null;
       }
+      case 'detect_pandoc': return detectPandoc(String(args.tool ?? ''));
+      case 'word_convert': return convertWord(args);
+      case 'pick_word': {
+        const kind=args.kind;if(!['pandoc','reference','import'].includes(kind))throw new Error(ui('选择类型无效。'));
+        return (await vscode.window.showOpenDialog({canSelectMany:false,title:kind==='pandoc'?ui('选择 Pandoc 程序'):ui('选择 Word 文档'),filters:kind==='pandoc'?(process.platform==='win32'?{Pandoc:['exe']}:undefined):{Word:['docx']}}))?.[0].fsPath ?? null;
+      }
+      case 'open_path': {
+        if(typeof args.path!=='string' || !path.isAbsolute(args.path) || !/\.md$/i.test(args.path))throw new Error(ui('需要 Markdown 绝对路径。'));
+        await vscode.commands.executeCommand('vscode.openWith',vscode.Uri.file(args.path),viewType);return null;
+      }
       case 'read_settings': return this.context.globalState.get('mdre.settings', {});
-      case 'write_settings': await this.context.globalState.update('mdre.settings', args.settings); return null;
+      case 'write_settings':
+        hostLanguage=args.settings?.language??hostLanguage;
+        if(this.settingsPanel)this.settingsPanel.title=ui('MDRE 设置'); {
+        await this.queueSettings(async()=>{
+          const current=this.context.globalState.get<Record<string,any>>('mdre.settings',{}),patch=args.patch ?? args.settings;
+          const next={...current,...patch};if(patch.reading_positions)next.reading_positions={...current.reading_positions,...patch.reading_positions};
+          await this.context.globalState.update('mdre.settings',next);
+          if(record.panel===this.settingsPanel)await this.context.globalState.update('mdre.settingsDraft',undefined);
+        });
+        for(const item of this.records)if(item!==record)void item.panel.webview.postMessage({type:'settings-changed'});return null;
+      }
+      case 'open_settings_window': this.openSettings(record);return null;
       case 'clipboard_read': return vscode.env.clipboard.readText();
       case 'clipboard_write':
-        if (typeof args.text !== 'string') throw new Error('剪贴板内容无效。');
+        if (typeof args.text !== 'string') throw new Error(ui('剪贴板内容无效。'));
         await vscode.env.clipboard.writeText(args.text); return null;
       case 'open_external':
-        if (typeof args.url !== 'string' || !/^(https?:|mailto:)/i.test(args.url)) throw new Error('链接协议不受支持。');
+        if (typeof args.url !== 'string' || !/^(https?:|mailto:)/i.test(args.url)) throw new Error(ui('链接协议不受支持。'));
         await vscode.env.openExternal(vscode.Uri.parse(args.url)); return null;
       case 'reveal_document': await vscode.commands.executeCommand('revealFileInOS', document.uri); return null;
       // 0.2.5：图片管理双击图片名称时在资源管理器中打开图片所在目录。
       case 'reveal_path': {
-        if (typeof args.path !== 'string' || !path.isAbsolute(args.path)) throw new Error('需要绝对文件路径。');
+        if (typeof args.path !== 'string' || !path.isAbsolute(args.path)) throw new Error(ui('需要绝对文件路径。'));
         const target = vscode.Uri.file(args.path);
         try { await vscode.commands.executeCommand('revealFileInOS', target); }
         catch { await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(path.dirname(args.path))); }
@@ -154,72 +223,72 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
       }
       // 0.2.5：可分享副本保存链（保存对话框 + 写 zip）。args.path 为绝对路径时跳过对话框，供自动化使用。
       case 'save_share_copy': {
-        if (typeof args.suggested !== 'string' || typeof args.base64 !== 'string') throw new Error('可分享副本参数无效。');
+        if (typeof args.suggested !== 'string' || typeof args.base64 !== 'string') throw new Error(ui('可分享副本参数无效。'));
         const bytes = Buffer.from(args.base64, 'base64');
-        if (!bytes.length) throw new Error('可分享副本数据为空。');
-        if (bytes.length > 512 * 1024 * 1024) throw new Error('可分享副本超过 512 MB。');
-        if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) throw new Error('可分享副本数据不是 ZIP 文件。');
+        if (!bytes.length) throw new Error(ui('可分享副本数据为空。'));
+        if (bytes.length > 512 * 1024 * 1024) throw new Error(ui('可分享副本超过 512 MB。'));
+        if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) throw new Error(ui('可分享副本数据不是 ZIP 文件。'));
         let target: string;
         if (typeof args.path === 'string') {
-          if (!path.isAbsolute(args.path) || !/\.zip$/i.test(args.path)) throw new Error('导出路径需要绝对 .zip 路径。');
+          if (!path.isAbsolute(args.path) || !/\.zip$/i.test(args.path)) throw new Error(ui('导出路径需要绝对 .zip 路径。'));
           target = args.path;
         } else {
           const defaultUri = document.isUntitled ? undefined : vscode.Uri.joinPath(document.uri, '..', path.basename(args.suggested));
-          const picked = await vscode.window.showSaveDialog({ defaultUri, filters: { 'Zip 压缩包': ['zip'] }, saveLabel: '导出可分享副本' });
+          const picked = await vscode.window.showSaveDialog({ defaultUri, filters: { [ui('Zip 压缩包')]: ['zip'] }, saveLabel: ui('导出可分享副本') });
           if (!picked) return null;
           target = picked.fsPath;
         }
         await vscode.workspace.fs.writeFile(vscode.Uri.file(target), bytes);
         return target;
       }
-      case 'open_settings_directory': await vscode.commands.executeCommand('workbench.action.openSettings', 'MDRE'); return 'VS Code 设置';
-      case 'register_file_association': throw new Error('请通过 VS Code 的“重新打开编辑器方式”设置 Markdown 默认编辑器。');
+      case 'open_settings_directory': await vscode.commands.executeCommand('workbench.action.openSettings', 'MDRE'); return ui('VS Code 设置');
+      case 'register_file_association': throw new Error(ui('请通过 VS Code 的“重新打开编辑器方式”设置 Markdown 默认编辑器。'));
       case 'pick_export': {
-        if (!['html','pdf'].includes(args.format) || typeof args.suggested!=='string') throw new Error('导出格式无效。');
+        if (!['html','pdf','docx','md'].includes(args.format) || typeof args.suggested!=='string') throw new Error(ui('导出格式无效。'));
         const defaultUri=document.isUntitled ? undefined : vscode.Uri.joinPath(document.uri,'..',path.basename(args.suggested));
-        const uri = await vscode.window.showSaveDialog({ defaultUri, filters: args.format==='pdf'?{PDF:['pdf']}:{HTML:['html']} });
+        const uri = await vscode.window.showSaveDialog({ defaultUri, filters: { [args.format.toUpperCase()]: [args.format] } });
         return uri?.fsPath ?? null;
       }
       case 'write_export':
-        if (typeof args.path !== 'string' || !/\.html$/i.test(args.path) || typeof args.html !== 'string') throw new Error('HTML 导出参数无效。');
+        if (typeof args.path !== 'string' || !/\.html$/i.test(args.path) || typeof args.html !== 'string') throw new Error(ui('HTML 导出参数无效。'));
         await vscode.workspace.fs.writeFile(vscode.Uri.file(args.path), Buffer.from(args.html)); return null;
       case 'export_pdf': {
-        if (typeof args.path!=='string' || !path.isAbsolute(args.path) || !/\.pdf$/i.test(args.path) || typeof args.html!=='string') throw new Error('PDF 导出参数无效。');
-        if (args.layout !== undefined && !['paged', 'long'].includes(args.layout)) throw new Error('PDF 页面方式无效。');
-        const bytes=await vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title:'MDRE：正在导出 PDF'},()=>pdfBytes(args.html,vscode.workspace.getConfiguration('mdre.pdf').get<string>('browserPath'),args.layout ?? 'paged'));
+        if (typeof args.path!=='string' || !path.isAbsolute(args.path) || !/\.pdf$/i.test(args.path) || typeof args.html!=='string') throw new Error(ui('PDF 导出参数无效。'));
+        if (args.layout !== undefined && !['paged', 'long'].includes(args.layout)) throw new Error(ui('PDF 页面方式无效。'));
+        const bytes=await vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title:ui('MDRE：正在导出 PDF')},()=>pdfBytes(args.html,vscode.workspace.getConfiguration('mdre.pdf').get<string>('browserPath'),args.layout ?? 'paged'));
         await vscode.workspace.fs.writeFile(vscode.Uri.file(args.path),bytes);
-        return {path:args.path,bytes:bytes.length,engine:'Chromium / 系统浏览器'};
+        return {path:args.path,bytes:bytes.length,engine:ui('Chromium / 系统浏览器')};
       }
       case 'clipboard_image_paths': return clipboardImagePaths();
-      case 'pick_images': return (await vscode.window.showOpenDialog({ canSelectMany: true, title: '插入图片（引用原文件）', filters: { 图片: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'] } }))?.map(uri => uri.fsPath) ?? null;
+      case 'pick_images': return (await vscode.window.showOpenDialog({ canSelectMany: true, title: ui('插入图片（引用原文件）'), filters: { [ui('图片')]: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'] } }))?.map(uri => uri.fsPath) ?? null;
       case 'read_binary': {
         const absolute = typeof args.path === 'string' ? absoluteImagePath(args.path) : null;
-        if (!absolute) throw new Error('图片需要绝对文件路径。');
+        if (!absolute) throw new Error(ui('图片需要绝对文件路径。'));
         return readImage(vscode.Uri.file(absolute));
       }
       case 'read_image': {
-        if (typeof args.resourceRoot !== 'string' || typeof args.relative !== 'string') throw new Error('图片资源路径无效。');
+        if (typeof args.resourceRoot !== 'string' || typeof args.relative !== 'string') throw new Error(ui('图片资源路径无效。'));
         const name = args.relative.replace(/^assets\//, '');
-        if (!name || /[\\/]/.test(name) || name === '..') throw new Error('恢复区图片只允许扁平文件名。');
+        if (!name || /[\\/]/.test(name) || name === '..') throw new Error(ui('恢复区图片只允许扁平文件名。'));
         return readImage(vscode.Uri.joinPath(vscode.Uri.file(args.resourceRoot), name));
       }
       case 'read_document_image': {
-        if (typeof args.relative !== 'string') throw new Error('图片路径无效。');
+        if (typeof args.relative !== 'string') throw new Error(ui('图片路径无效。'));
         // 前端已按 Markdown URI 解码一次，保留真实文件名中的百分号。
         const uri = vscode.Uri.joinPath(document.uri, '..', args.relative);
         return readImage(uri);
       }
       case 'save_image': {
         const request = args.request;
-        if (!request || typeof request.base64 !== 'string' || !/^(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(request.extension)) throw new Error('图片数据无效。');
+        if (!request || typeof request.base64 !== 'string' || !/^(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(request.extension)) throw new Error(ui('图片数据无效。'));
         const bytes = Buffer.from(request.base64, 'base64');
         const hash = createHash('sha256').update(bytes).digest('hex');
-        if (!bytes.length || bytes.length > 20 * 1024 * 1024) throw new Error('图片为空或超过 20 MB。');
+        if (!bytes.length || bytes.length > 20 * 1024 * 1024) throw new Error(ui('图片为空或超过 20 MB。'));
         const store = async (directory: vscode.Uri, fallback: boolean) => {
           const uri = vscode.Uri.joinPath(directory, `${hash}.${request.extension.toLowerCase()}`);
           await vscode.workspace.fs.createDirectory(directory);
           let deduplicated = false;
-          try { const existing = await vscode.workspace.fs.readFile(uri); if (!Buffer.from(existing).equals(bytes)) throw new Error('图片名称冲突，原文件未覆盖。'); deduplicated = true; }
+          try { const existing = await vscode.workspace.fs.readFile(uri); if (!Buffer.from(existing).equals(bytes)) throw new Error(ui('图片名称冲突，原文件未覆盖。')); deduplicated = true; }
           catch (reason) { if (!(reason instanceof vscode.FileSystemError) || reason.code !== 'FileNotFound') throw reason; }
           if (!deduplicated) await vscode.workspace.fs.writeFile(uri, bytes);
           return { relativePath: fallback ? `assets/${path.basename(uri.fsPath)}` : '', absolutePath: uri.fsPath, resourceRoot: directory.fsPath, bytes: bytes.length, hash, deduplicated, fallback, referenceAbsolute: document.isUntitled };

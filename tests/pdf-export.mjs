@@ -1,5 +1,7 @@
+// 用途：pdf-export 的插件宿主／界面验证。
 import { chromium } from 'playwright';
-import { build } from 'esbuild';
+import {createRequire as testRequire} from 'node:module';
+const {build}=testRequire(new URL('../package.json',import.meta.url))('esbuild');
 import { createRequire } from 'node:module';
 import { mkdir,writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
@@ -33,7 +35,7 @@ try {
   assert.equal(await page.locator('#render .code-block').nth(1).evaluate(element=>getComputedStyle(element).getPropertyValue('--code-bg').trim()),'#f6f7f8');
   assert.equal(await page.evaluate(()=>window.mdre.workspace.active.source),fixture,'切换主题不改源码');
   const editorMath=await page.locator('#render .math-block .katex').evaluate(element=>({html:element.innerHTML,fontSize:getComputedStyle(element).fontSize,font:getComputedStyle(element).fontFamily,height:element.getBoundingClientRect().height}));
-  await page.locator('#export-menu').click();await page.locator('#pdf-open').click();
+  await page.locator('#export-menu').click();await page.locator('#pdf-open').click();await page.locator('#pdf-dialog #pdf').click();
   await page.waitForFunction(()=>!!window.testPdfSnapshot);
   assert.equal(await page.evaluate(()=>window.testExportPick.format),'pdf');
   const html=await page.evaluate(()=>window.testPdfSnapshot);

@@ -1,3 +1,4 @@
+// 用途：watch 的插件宿主／界面验证。
 import { spawn } from 'node:child_process';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
