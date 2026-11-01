@@ -10,13 +10,9 @@
   <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS_Code-1.95%2B-667085" alt="VS Code 1.95+"></a>
 </p>
 
-<p align="center"><a href="#features">Features</a> · <a href="#download-and-installation">Download and installation</a> · <a href="#development">Development</a> · <a href="#contributing">Contributing</a> · <a href="#license">License</a></p>
+<p align="center"><a href="#features">Features</a> · <a href="#getting-started">Getting started</a> · <a href="#documentation">Documentation</a> · <a href="#development">Development</a> · <a href="#license">License</a></p>
 
 <p align="center"><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
-
-## Screenshot
-
-![MDRE for VS Code with synchronized Markdown source and rich-text views](media/screenshots/editor.png)
 
 ## Features
 
@@ -28,31 +24,34 @@
 - **Convert Word documents.** Import and export `.docx` files through a separately installed Pandoc.
 - **Set up your workspace.** Open settings as a popup inside the editor and choose light or dark themes, English or Simplified Chinese, view presets, system fonts, and searchable offline help with chapter navigation.
 
-Files, tabs, saving, and undo/redo use VS Code’s document model. MDRE is an optional Markdown editor, alongside VS Code’s built-in editor.
+## Screenshot
 
-Editing and preview run locally. Editor resources, equation fonts, and help are bundled; remote images and external links depend on network access. See the [user guide](docs/help/en/usage.md) and [syntax reference](docs/help/en/syntax.md) for supported behavior.
+![MDRE for VS Code with synchronized Markdown source and rich-text views](media/screenshots/editor.png)
 
-## Download and installation
+## Getting started
 
-Current build: **0.2.7**. See the [changelog](CHANGELOG.md) for version notes.
-
-| Edition | Download | Requirements |
-| --- | --- | --- |
-| VS Code extension | [Download mdre-vscode-0.2.7.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases/download/v0.2.7/mdre-vscode-0.2.7.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
-
-Download the VSIX and choose **Extensions: Install from VSIX…** in VS Code, or run:
+Install MDRE from the Marketplace, or install the VSIX package and run:
 
 ```powershell
 code --install-extension .\mdre-vscode-0.2.7.vsix --force
 ```
 
-Reload VS Code, open a `.md` or `.markdown` file, and choose **Reopen Editor With → MDRE Split Editor**. You can also run **MDRE: Open split editor** from the Command Palette. The extension initially shows rich text; the split-view button reveals source.
+Reload VS Code, open a `.md` or `.markdown` file, and choose **Reopen Editor With → MDRE Split Editor**; you can also run **MDRE: Open split editor** from the Command Palette. The editor shows rich text first, and the split-view button reveals the Markdown source.
 
-PDF export requires Edge or Chrome. If detection fails, set `mdre.pdf.browserPath` in VS Code settings.
+Saving, autosave, undo and redo use VS Code's document model. MDRE is an optional Markdown editor that works alongside the built-in editor.
 
-Word import and export require [Pandoc](https://pandoc.org/installing.html). See the [user guide](docs/help/en/usage.md) for setup.
+PDF export uses Microsoft Edge or Google Chrome; set `mdre.pdf.browserPath` if detection fails. Word import and export use a separately installed [Pandoc](https://pandoc.org/installing.html).
 
-Looking for the other edition? See the [Windows desktop app](https://github.com/LaizhuangJi0601/MDRE).
+MDRE runs locally. Editor resources, equation fonts and offline help are bundled; remote images and external links need network access.
+
+## Documentation
+
+- [User guide](docs/help/en/usage.md)
+- [Syntax reference](docs/help/en/syntax.md)
+- [Notices and licenses](docs/help/en/notices.md)
+- [Changelog](CHANGELOG.md)
+
+Looking for the desktop edition? See [MDRE for Windows](https://github.com/LaizhuangJi0601/MDRE).
 
 ## Development
 
@@ -66,11 +65,11 @@ pnpm build
 pnpm package
 ```
 
-`pnpm build` builds the extension host and webview; `pnpm package` creates the VSIX. Use `pnpm dev` for an Extension Development Host. See [development notes](docs/development.md) for checks and tooling.
+`pnpm dev` starts an Extension Development Host. See [development notes](docs/development.md) for checks and tooling.
 
 ## Contributing
 
-Bug reports, suggestions, and pull requests are welcome. Use [Issues](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/issues) with the app version, reproduction steps, and a small Markdown example; include a screenshot for visual issues. Keep the English and Chinese documentation aligned when changing user-facing behavior.
+Bug reports, suggestions, and pull requests are welcome. Use [Issues](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/issues) with the version, reproduction steps, and a small Markdown example; include a screenshot for visual issues. Keep the English and Chinese documentation aligned.
 
 ## License
 

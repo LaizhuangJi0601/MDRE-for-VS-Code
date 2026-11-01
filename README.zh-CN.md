@@ -10,13 +10,9 @@
   <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS_Code-1.95%2B-667085" alt="VS Code 1.95+"></a>
 </p>
 
-<p align="center"><a href="#功能">功能</a> · <a href="#下载安装">下载安装</a> · <a href="#开发">开发</a> · <a href="#参与贡献">参与贡献</a> · <a href="#许可">许可</a></p>
+<p align="center"><a href="#功能">功能</a> · <a href="#开始使用">开始使用</a> · <a href="#文档">文档</a> · <a href="#开发">开发</a> · <a href="#许可">许可</a></p>
 
 <p align="center"><a href="README.md">English</a> · <strong>简体中文</strong></p>
-
-## 界面预览
-
-![MDRE for VS Code 的 Markdown 源码与富文本编辑界面](media/screenshots/editor.png)
 
 ## 功能
 
@@ -28,29 +24,32 @@
 - **Word 转换。** 通过另行安装的 Pandoc 导入、导出 `.docx`。
 - **按偏好组织工作区。** 设置以编辑器内弹窗打开；提供浅色／深色主题、简体中文／English、视图预设、本机字体选择，以及可搜索的离线帮助与章节导航。
 
-文件、标签、保存及撤销／重做使用 VS Code 原生机制。MDRE 作为可选编辑器打开 Markdown，保留原生 Markdown 编辑器。
+## 界面预览
 
-编辑与预览在本机运行；编辑器资源、公式字体与帮助文档随程序提供。网络图片与外部链接的可用性取决于网络。支持范围见[使用指南](docs/help/usage.md)与[语法参考](docs/help/syntax.md)。
+![MDRE for VS Code 的 Markdown 源码与富文本编辑界面](media/screenshots/editor.png)
 
-## 下载安装
+## 开始使用
 
-当前构建为 **0.2.7**。[更新记录](CHANGELOG.md)汇总版本变化。
-
-| 版本 | 下载 | 运行要求 |
-| --- | --- | --- |
-| VS Code 插件 | [下载 mdre-vscode-0.2.7.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases/download/v0.2.7/mdre-vscode-0.2.7.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
-
-下载 VSIX 后，在 VS Code 执行 **扩展：从 VSIX 安装…**，或运行：
+从扩展市场安装 MDRE，或安装 VSIX 后运行：
 
 ```powershell
 code --install-extension .\mdre-vscode-0.2.7.vsix --force
 ```
 
-重新加载 VS Code，打开 `.md` 或 `.markdown` 文件，选择 **重新打开编辑器方式 → MDRE 双栏编辑器**，也可在命令面板运行 **MDRE: 打开双栏编辑器**。扩展默认仅显示富文本；工具栏的分栏按钮可显示源码。
+重新加载 VS Code，打开 `.md` 或 `.markdown` 文件，选择 **重新打开编辑器方式 → MDRE 双栏编辑器**；也可在命令面板运行 **MDRE: 打开双栏编辑器**。扩展默认显示富文本，工具栏的分栏按钮可显示 Markdown 源码。
 
-PDF 导出需要本机 Edge 或 Chrome。检测失败时，在 VS Code 设置中填写 `mdre.pdf.browserPath`。
+保存、自动保存、撤销与重做使用 VS Code 原生文档机制；MDRE 是可选的 Markdown 编辑器，与内置编辑器并存。
 
-Word 导入与导出需要 [Pandoc](https://pandoc.org/installing.html)，配置方法见[使用指南](docs/help/usage.md)。
+PDF 导出使用本机 Edge 或 Chrome；检测失败时可在 VS Code 设置中填写 `mdre.pdf.browserPath`。Word 导入导出需要另行安装 [Pandoc](https://pandoc.org/installing.html)。
+
+MDRE 在本机运行；编辑器资源、公式字体与离线帮助随扩展提供，网络图片与外部链接的可用性取决于网络。
+
+## 文档
+
+- [使用指南](docs/help/usage.md)
+- [语法参考](docs/help/syntax.md)
+- [声明与许可](docs/help/third-party-notices.md)
+- [更新记录](CHANGELOG.md)
 
 另一种使用方式：[Windows 桌面版](https://github.com/LaizhuangJi0601/MDRE)。
 
@@ -66,11 +65,11 @@ pnpm build
 pnpm package
 ```
 
-`pnpm build` 构建扩展宿主与 Webview，`pnpm package` 生成 VSIX。`pnpm dev` 可在 VS Code 扩展开发宿主中调试；开发检查见[开发文档](docs/development.md)。
+`pnpm dev` 可在 VS Code 扩展开发宿主中调试；开发检查见[开发文档](docs/development.md)。
 
 ## 参与贡献
 
-欢迎通过 [Issues](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/issues) 报告问题或提出建议，也可提交 Pull Request。报告问题时，请附上版本、操作步骤和最小 Markdown 示例；界面问题可附截图。涉及文档的改动，请同步维护中英文说明。
+欢迎通过 [Issues](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/issues) 报告问题或提出建议，也可提交 Pull Request。报告问题时请附版本、操作步骤和最小 Markdown 示例；界面问题可附截图。涉及文档的改动，请同步维护中英文说明。
 
 ## 许可
 
