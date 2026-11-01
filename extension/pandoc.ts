@@ -25,6 +25,11 @@ function absolute(value: unknown, extension: string): string {
   if(typeof value !== 'string' || !path.isAbsolute(value) || path.extname(value).toLowerCase()!==extension) throw new Error(`需要绝对 ${extension} 文件路径。`);
   return value;
 }
+// v0.2.7：导出 HTML 的 <title> 会被 Pandoc 当作文档标题插到 DOCX 开头（“MDRE 文档快照”）。
+// 渲染端已不再输出标题，这里在宿主侧再兜底剥离，只删标题标签本身。
+function stripHtmlTitle(html: string): string {
+  return html.replace(/<title\b[^>]*>[\s\S]*?<\/title\s*>/gi, '');
+}
 export async function convertWord(args: {direction:string;tool:string;path:string;html?:string;input?:string;reference?:string}) {
   const tool=await detectPandoc(args.tool);
   const temp=await mkdtemp(path.join(tmpdir(),'mdre-word-'));
@@ -36,7 +41,7 @@ export async function convertWord(args: {direction:string;tool:string;path:strin
     const command: string[]=[];
     if(exporting) {
       if(typeof args.html!=='string' || Buffer.byteLength(args.html)>128*1024*1024) throw new Error('导出内容无效或超过 128 MiB。');
-      const input=path.join(temp,'input.html'); await writeFile(input,args.html);
+      const input=path.join(temp,'input.html'); await writeFile(input,stripHtmlTitle(args.html));
       command.push(input,'--from=html','--to=docx');
       if(args.reference?.trim()) {const reference=absolute(args.reference,'.docx');await access(reference);command.push(`--reference-doc=${reference}`);}
     } else {

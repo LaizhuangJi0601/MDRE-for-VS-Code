@@ -111,10 +111,19 @@ export async function run() {
     assert(/\$[^$]*x[^$]*\$/.test(wordText),'公式必须还原为 Markdown 公式，不能只有字面文本');
     await assert.rejects(()=>rpc('word_convert',{direction:'import',tool:pandoc.path,path:markdownPath,input:wordPath}),/覆盖/);
     passed.push('真实 VS Code 宿主检测外部 Pandoc 并完成含公式 DOCX 往返，拒绝覆盖 Markdown');
-    await rpc('open_settings_window');
-    for(let i=0;i<40&&!vscode.window.tabGroups.all.some(group=>group.tabs.some(tab=>tab.label==='MDRE 设置'));i++)await new Promise(resolve=>setTimeout(resolve,50));
-    assert(vscode.window.tabGroups.all.some(group=>group.tabs.some(tab=>tab.label==='MDRE 设置')));
-    passed.push('真实 VS Code 可打开独立设置标签页');
+    // 0.2.7 需求 3：设置改为编辑器 webview 内的浮层弹窗，不再创建 VS Code 标签页 / 面板；
+    // 宿主只保留设置读写、草稿、界面状态与字体枚举 RPC。
+    const systemFonts = await rpc('list_system_fonts');
+    assert(Array.isArray(systemFonts) && systemFonts.length > 50, `本机字体应 > 50 个，实际 ${systemFonts?.length}`);
+    await assert.rejects(() => rpc('open_settings_window'), /弹窗/);
+    assert(!vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'MDRE 设置')), '不应再创建设置标签页');
+    await rpc('write_ui_state', { key: 'mdre.settings.dialog.bounds', value: { left: 10, top: 20, width: 900, height: 640 } });
+    assert.deepEqual(await rpc('read_ui_state', { key: 'mdre.settings.dialog.bounds' }), { left: 10, top: 20, width: 900, height: 640 });
+    await rpc('settings_draft', { draft: { valid: true, patch: { motion: 'on' }, values: { motion: 'on' } } });
+    assert.deepEqual((settings.get('mdre.settingsDraft') as any)?.values, { motion: 'on' });
+    await rpc('settings_draft', { draft: null });
+    assert.equal(settings.get('mdre.settingsDraft'), undefined);
+    passed.push('设置不再创建 VS Code 标签页；字体枚举、界面状态与编辑器面板草稿 RPC 可用');
     // 正常退出提交有效草稿；无效草稿继续保留，绝不能被校验器静默改成默认值。
     settings.set('mdre.settingsDraft',{valid:true,patch:{motion:'off',font_size:19},values:{motion:'off',font_size:'19'}});
     await provider.shutdownSettings();

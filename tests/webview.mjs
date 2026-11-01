@@ -11,6 +11,9 @@ const errors = [];
 page.on('pageerror', reason => errors.push(reason.message));
 const passed = [];
 try {
+  // v0.2.7 动画快照（.mdre-ghost）会克隆界面节点并复制 id；本脚本只验证编辑/设置语义，
+  // 关闭界面动画避免快照与 Playwright 严格定位器冲突。
+  await page.addInitScript(() => localStorage.setItem('mdre-test-settings', JSON.stringify({ ...(JSON.parse(localStorage.getItem('mdre-test-settings') || '{}')), motion: 'off' })));
   await page.goto(url);
   await page.waitForFunction(() => window.mdre?.workspace.active?.source.includes('双栏编辑验收') && window.mdre.workspace.active.renderRevision === window.mdre.workspace.active.revision);
   assert.equal(await page.locator('#source-pane').isVisible(), false);
@@ -96,10 +99,10 @@ try {
   // 默认布局保存后在下一次打开生效，取消设置不改写持久化配置。
   let settingsPage;
   async function settingsDialog() {
-    const popup=page.waitForEvent('popup');
+    // 0.2.7：设置改为编辑器 webview 内的浮层弹窗，不再是独立页面 / VS Code 标签页。
     await page.locator('#settings-open').click();
-    settingsPage=await popup;
-    await settingsPage.locator('#settings-dialog[open]').waitFor();
+    await page.locator('#settings-dialog[open]').waitFor();
+    settingsPage=page;
     await settingsPage.locator('.settings-navigation button').filter({hasText:'编辑与文件'}).click();
   }
   await settingsDialog();

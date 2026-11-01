@@ -9,6 +9,7 @@ import path from 'node:path';
 import { pdfBytes } from './pdf';
 import { absoluteImagePath } from '../src/image-path';
 import { readImage, clipboardImagePaths } from './image-files';
+import { listSystemFonts } from './fonts';
 
 const viewType = 'mdre.editor';
 type PanelRecord = { document: vscode.TextDocument; panel: vscode.WebviewPanel; editing: boolean; savedText: string };
@@ -46,7 +47,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export class MDREProvider implements vscode.CustomTextEditorProvider {
   private records = new Set<PanelRecord>();
-  private settingsPanel: vscode.WebviewPanel | undefined;
   private settingsWrites: Promise<unknown> = Promise.resolve();
   private shuttingDown=false;
   private queueSettings<T>(operation:()=>Promise<T>):Promise<T> {
@@ -84,28 +84,8 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
     });
     panel.onDidDispose(() => { listener.dispose(); this.records.delete(record); });
   }
-  private openSettings(record: PanelRecord) {
-    if(this.settingsPanel){this.settingsPanel.reveal();return;}
-    const panel=vscode.window.createWebviewPanel('mdre.settings',ui('MDRE 设置'),vscode.ViewColumn.Beside,{enableScripts:true,retainContextWhenHidden:true});
-    this.settingsPanel=panel;this.prepare(panel,record.document,'settings.html');
-    const bridge={...record,panel};
-    const listener=panel.webview.onDidReceiveMessage(async message=>{
-      if(message.type!=='rpc'||!Number.isInteger(message.id))return;
-      try{
-        if(message.command==='settings_draft'){
-          const draft=message.args?.draft as SettingsDraft;
-          if(!draft || typeof draft.valid!=='boolean'||!draft.patch||!draft.values||JSON.stringify(draft).length>65536)throw new Error(ui('设置草稿无效。'));
-          await this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',draft);});
-          await panel.webview.postMessage({type:'rpc-result',id:message.id,value:null});return;
-        }
-        if(message.command==='read_settings_draft'){await panel.webview.postMessage({type:'rpc-result',id:message.id,value:this.context.globalState.get('mdre.settingsDraft',null)});return;}
-        if(message.command==='close_settings'){await this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',undefined);});panel.dispose();return;}
-        if(!['read_settings','write_settings','detect_pandoc','pick_word','open_external','open_settings_directory'].includes(message.command))throw new Error(ui('设置页不支持该操作。'));
-        const value=await this.command(bridge,message.command,message.args??{});await panel.webview.postMessage({type:'rpc-result',id:message.id,value});
-      }catch(error){await panel.webview.postMessage({type:'rpc-result',id:message.id,error:String(error)});}
-    });
-    panel.onDidDispose(()=>{listener.dispose();this.settingsPanel=undefined;if(!this.shuttingDown)void this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',undefined);}).catch(reason=>vscode.window.showErrorMessage(`设置草稿清理失败：${reason}`));});
-  }
+  // v0.2.7 需求 3：设置不再创建 VS Code 面板/标签页，
+  // 改由编辑器 webview 内的浮层弹窗显示（与桌面版观感一致）；宿主只保留设置读写与字体枚举 RPC。
   private prepare(panel: vscode.WebviewPanel, document: vscode.TextDocument, entry='index.html') {
     const folder = vscode.Uri.joinPath(document.uri, '..');
     panel.webview.options = {
@@ -194,17 +174,41 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
       }
       case 'read_settings': return this.context.globalState.get('mdre.settings', {});
       case 'write_settings':
-        hostLanguage=args.settings?.language??hostLanguage;
-        if(this.settingsPanel)this.settingsPanel.title=ui('MDRE 设置'); {
+        hostLanguage=args.settings?.language??hostLanguage; {
         await this.queueSettings(async()=>{
           const current=this.context.globalState.get<Record<string,any>>('mdre.settings',{}),patch=args.patch ?? args.settings;
           const next={...current,...patch};if(patch.reading_positions)next.reading_positions={...current.reading_positions,...patch.reading_positions};
           await this.context.globalState.update('mdre.settings',next);
-          if(record.panel===this.settingsPanel)await this.context.globalState.update('mdre.settingsDraft',undefined);
+          // 保存成功后草稿已无意义；清理后重启不会再把旧草稿合并进设置。
+          await this.context.globalState.update('mdre.settingsDraft',undefined);
         });
         for(const item of this.records)if(item!==record)void item.panel.webview.postMessage({type:'settings-changed'});return null;
       }
-      case 'open_settings_window': this.openSettings(record);return null;
+      // v0.2.7 需求 3：设置改为编辑器 webview 内的浮层弹窗，草稿与界面状态由编辑器面板 RPC 处理。
+      case 'settings_draft': {
+        const draft=args.draft as SettingsDraft|null;
+        if(draft==null){await this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',undefined);});return null;}
+        if(typeof draft.valid!=='boolean'||!draft.patch||!draft.values||JSON.stringify(draft).length>65536)throw new Error(ui('设置草稿无效。'));
+        await this.queueSettings(async()=>{await this.context.globalState.update('mdre.settingsDraft',draft);});
+        return null;
+      }
+      case 'read_settings_draft': return this.context.globalState.get('mdre.settingsDraft',null);
+      case 'close_settings': return null;
+      case 'list_system_fonts': return listSystemFonts();
+      case 'read_ui_state': {
+        const key=args.key;
+        if(typeof key!=='string'||key.length>200)throw new Error(ui('界面状态键无效。'));
+        return this.context.globalState.get(`mdre.ui.${key}`,null);
+      }
+      case 'write_ui_state': {
+        const key=args.key;
+        if(typeof key!=='string'||key.length>200)throw new Error(ui('界面状态键无效。'));
+        const value=args.value??undefined;
+        if(value!==undefined&&JSON.stringify(value).length>4096)throw new Error(ui('界面状态过大。'));
+        await this.queueSettings(async()=>{await this.context.globalState.update(`mdre.ui.${key}`,value);});
+        return null;
+      }
+      case 'open_settings_window': throw new Error(ui('设置已在编辑器内以弹窗打开。'));
       case 'clipboard_read': return vscode.env.clipboard.readText();
       case 'clipboard_write':
         if (typeof args.text !== 'string') throw new Error(ui('剪贴板内容无效。'));

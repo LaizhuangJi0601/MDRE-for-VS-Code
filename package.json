@@ -2,7 +2,7 @@
   "name": "mdre-vscode",
   "displayName": "MDRE",
   "description": "%description%",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "publisher": "LaizhuangJi0601",
   "license": "MIT",
   "engines": {

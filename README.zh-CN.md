@@ -5,7 +5,7 @@
 <p align="center"><strong>同一份 Markdown，两种编辑方式。</strong><br>在 VS Code 中同步编辑 Markdown 源码与富文本。<br><sub>VS Code 1.95+ · English / 简体中文</sub></p>
 
 <p align="center">
-  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.6-2878d5" alt="Version 0.2.6"></a>
+  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.7-2878d5" alt="Version 0.2.7"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b8c70" alt="MIT license"></a>
   <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS_Code-1.95%2B-667085" alt="VS Code 1.95+"></a>
 </p>
@@ -20,13 +20,13 @@
 
 ## 功能
 
-- **源码与富文本同步编辑。** 两栏保持同步，也可仅显示富文本；标题、列表、链接和文字格式可通过工具栏或右键菜单编辑。
-- **公式、图表与代码。** KaTeX 呈现数学公式，MathLive 提供可视化公式编辑；支持 Mermaid 图表、代码高亮与代码块主题。
-- **按阅读方式排版。** A4 连续或分页视图支持 25%–250% 缩放；非 A4 页宽可在 60%–100% 间调整，正文支持四种对齐方式。
+- **源码与富文本同步编辑。** 两栏保持同步，也可仅显示富文本；标题、列表、链接和文字格式可通过工具栏或右键菜单编辑，页内链接与标题锚点可直接跳转到对应位置。
+- **公式、图表与代码。** KaTeX 呈现数学公式，MathLive 提供可视化公式编辑；支持 Mermaid 图表（流程图、时序图、类图、状态图、甘特图、饼图、ER 图、思维导图、时间线等）、代码高亮与代码块主题。图表源码在显示前会统一规范化，含换行标签、中文或标点符号的标签也能稳定渲染。
+- **按阅读方式排版。** A4 连续或分页视图支持 25%–250% 缩放，缩放值会被记住并应用到之后打开的每个文档；非 A4 页宽可在 60%–100% 间调整，正文支持四种对齐方式。
 - **处理表格与图片。** 调整列宽、对齐、合并和拆分单元格；图片管理按引用顺序列出资源，并可定位到正文。
 - **导出与互通。** 导出 HTML、PDF，或包含 Markdown 与本地图片的 ZIP；支持复制为富文本及 HTML 转 Markdown 粘贴。
-- **Word 转换。** 调用另行安装的 Pandoc 导入、导出 `.docx`，支持常见结构与公式。
-- **按偏好组织工作区。** 提供浅色／深色主题、简体中文／English、视图预设、分类设置、章节导航和可搜索的离线帮助。
+- **Word 转换。** 调用另行安装的 Pandoc 导入、导出 `.docx`，导出的文档与 Markdown 内容一致，不再附加额外标题文字。
+- **按偏好组织工作区。** 设置以编辑器内弹窗打开；提供浅色／深色主题、简体中文／English、视图预设，以及读取本机已安装字体的字体选择；切换以约 0.8 秒的原位淡入淡出呈现，并提供章节导航和可搜索的离线帮助。
 
 文件、标签、保存及撤销／重做使用 VS Code 原生机制。MDRE 作为可选编辑器打开 Markdown，保留原生 Markdown 编辑器。
 
@@ -34,16 +34,16 @@
 
 ## 下载安装
 
-当前构建为 **0.2.6 · updata2**。[更新记录](CHANGELOG.md)汇总版本变化。
+当前构建为 **0.2.7**。[更新记录](CHANGELOG.md)汇总版本变化。
 
 | 版本 | 下载 | 运行要求 |
 | --- | --- | --- |
-| VS Code 插件 | [下载 mdre-vscode-0.2.6.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases/download/v0.2.6/mdre-vscode-0.2.6.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
+| VS Code 插件 | [下载 mdre-vscode-0.2.7.vsix](https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/releases/download/v0.2.7/mdre-vscode-0.2.7.vsix) · [SHA-256](SHA256SUMS.txt) | VS Code 1.95+ |
 
 下载 VSIX 后，在 VS Code 执行 **扩展：从 VSIX 安装…**，或运行：
 
 ```powershell
-code --install-extension .\mdre-vscode-0.2.6.vsix --force
+code --install-extension .\mdre-vscode-0.2.7.vsix --force
 ```
 
 重新加载 VS Code，打开 `.md` 或 `.markdown` 文件，选择 **重新打开编辑器方式 → MDRE 双栏编辑器**，也可在命令面板运行 **MDRE: 打开双栏编辑器**。扩展默认仅显示富文本；工具栏的分栏按钮可显示源码。

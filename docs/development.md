@@ -7,7 +7,6 @@ pnpm install --frozen-lockfile
 pnpm build
 pnpm test:core
 pnpm test:ui
-pnpm test:pdf
 pnpm test:host
 pnpm audit:source
 pnpm package

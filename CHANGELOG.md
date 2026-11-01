@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.7
+
+- Fixed Mermaid diagrams failing to display when labels contain line breaks or other HTML tags; diagram source is normalized to valid SVG, and common diagram types, themes, and complex labels are covered.
+- Reworked transitions into in-place cross-fades of about 0.8 seconds: outgoing content fades out where it is and incoming content fades in at its final position, with no sliding or fly-in motion. Fixed flickers during some view changes; composition input protection and reduced-motion support are kept.
+- Settings now open as a popup inside the editor instead of a separate VS Code editor page, matching the desktop layout; apply, cancel, defaults, search, and language switching are unchanged.
+- Exported `.docx` files follow the Markdown content without extra "document snapshot" titles.
+- The A4 zoom level is remembered globally and reused for every newly opened document (25%–250%).
+- Settings, help, and shortcuts windows reopen at their last position and are kept inside the visible screen.
+- Body and monospace font choices now list fonts installed on the system.
+- Improved rendering performance for long documents.
+- Removed the "offline help" footer from the help page so the content area gets more room.
+- Reviewed and fixed basic syntax rendering, in particular links and heading anchors.
+
 ## 0.2.6
 
 - Added Word import and export with Pandoc, including common document structures and equations.
