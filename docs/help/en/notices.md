@@ -12,6 +12,8 @@ MDRE is licensed under MIT. Third-party copyright and usage terms are governed b
 | markdown-it / entities | Markdown and HTML entity processing | [markdown-it](https://github.com/markdown-it/markdown-it) · [entities](https://github.com/fb55/entities) |
 | KaTeX / MathLive | Equation rendering, fonts and visual editing | [KaTeX](https://github.com/KaTeX/KaTeX) · [MathLive](https://github.com/arnog/mathlive) |
 | Mermaid / highlight.js | Diagrams and code highlighting | [Mermaid](https://github.com/mermaid-js/mermaid) · [highlight.js](https://github.com/highlightjs/highlight.js) |
+| pdf.js | PDF page rendering, zoom and thumbnails | [pdf.js](https://mozilla.github.io/pdf.js/) |
+| Mammoth | Word documents converted to HTML for reading | [Mammoth](https://github.com/mwilliamson/mammoth.js) |
 | Node.js / Playwright | System integration and PDF printing | [Node.js](https://github.com/nodejs/node) · [Playwright](https://github.com/microsoft/playwright) |
 
 ## Runtime and external tools

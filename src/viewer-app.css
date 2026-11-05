@@ -1,0 +1,10 @@
+/* v0.3.0：VS Code 插件内 PDF / Word 查看页布局。 */
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--surface); color: var(--text); }
+.aux-root { display: flex; height: 100vh; min-height: 0; }
+.aux-root.aux-pdf-page { background: var(--surface); }
+.aux-pdf-sidebar { width: 148px; flex: 0 0 148px; border-right: 1px solid var(--border); overflow: auto; background: var(--surface); }
+.aux-pdf-thumbs { min-height: 100%; }
+.aux-pdf-main { flex: 1; min-width: 0; min-height: 0; position: relative; }
+.aux-docx-page { display: block; overflow: auto; background: var(--surface); padding: 28px 40px 80px; }
+.aux-docx { max-width: 900px; margin: 0 auto; }
+.mdre-pdf-host { height: 100%; }

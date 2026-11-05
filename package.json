@@ -2,7 +2,7 @@
   "name": "mdre-vscode",
   "displayName": "MDRE",
   "description": "%description%",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "publisher": "LaizhuangJi0601",
   "license": "MIT",
   "engines": {
@@ -13,7 +13,8 @@
   ],
   "main": "./out/extension.cjs",
   "activationEvents": [
-    "onCustomEditor:mdre.editor"
+    "onCustomEditor:mdre.editor",
+    "onCustomEditor:mdre.aux"
   ],
   "contributes": {
     "configuration": {
@@ -50,6 +51,22 @@
           },
           {
             "filenamePattern": "*.markdown"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "mdre.aux",
+        "displayName": "%editor.auxName%",
+        "selector": [
+          {
+            "filenamePattern": "*.pdf"
+          },
+          {
+            "filenamePattern": "*.docx"
+          },
+          {
+            "filenamePattern": "*.doc"
           }
         ],
         "priority": "option"
@@ -131,7 +148,10 @@
     "prosemirror-schema-list": "^1.5.1",
     "prosemirror-state": "^1.4.3",
     "prosemirror-transform": "^1.10.5",
-    "prosemirror-view": "^1.41.3"
+    "prosemirror-view": "^1.41.3",
+    "@codemirror/legacy-modes": "6.5.5",
+    "mammoth": "1.13.0",
+    "pdfjs-dist": "4.10.38"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",

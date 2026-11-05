@@ -16,6 +16,7 @@
 | @codemirror/lang-javascript | 6.2.5 | MIT | 运行间接依赖 |
 | @codemirror/lang-markdown | 6.5.2 | MIT | 运行直接依赖 |
 | @codemirror/language | 6.13.1 | MIT | 运行间接依赖 |
+| @codemirror/legacy-modes | 6.5.5 | MIT | 运行直接依赖 |
 | @codemirror/lint | 6.9.7 | MIT | 运行间接依赖 |
 | @codemirror/state | 6.7.6 | MIT | 运行间接依赖 |
 | @codemirror/streamparser | 6.0.0 | MIT | 运行间接依赖 |
@@ -73,7 +74,10 @@
 | @upsetjs/venn.js | 2.0.0 | MIT | 运行间接依赖 |
 | @vscode/test-electron | 2.5.2 | MIT | 开发直接依赖 |
 | @vscode/vsce | 3.9.2 | MIT | 开发直接依赖 |
+| @xmldom/xmldom | 0.8.15 | MIT | 运行间接依赖 |
+| argparse | 1.0.10 | MIT | 运行间接依赖 |
 | argparse | 2.0.1 | Python-2.0 | 运行间接依赖 |
+| base64-js | 1.5.1 | MIT | 运行间接依赖 |
 | commander | 7.2.0 | MIT | 运行间接依赖 |
 | commander | 8.3.0 | MIT | 运行间接依赖 |
 | cose-base | 1.0.3 | MIT | 运行间接依赖 |
@@ -120,6 +124,7 @@
 | dagre-d3-es | 7.0.14 | MIT | 运行间接依赖 |
 | dayjs | 1.11.23 | MIT | 运行间接依赖 |
 | delaunator | 5.1.0 | ISC | 运行间接依赖 |
+| dingbat-to-unicode | 1.0.2 | BSD-2-Clause | 运行间接依赖 |
 | dompurify | 3.4.16 | (MPL-2.0 OR Apache-2.0) | 运行间接依赖 |
 | entities | 4.5.0 | BSD-2-Clause | 运行间接依赖 |
 | entities | 6.0.1 | BSD-2-Clause | 运行直接依赖 |
@@ -132,12 +137,15 @@
 | import-meta-resolve | 4.2.0 | MIT | 运行间接依赖 |
 | internmap | 1.0.1 | ISC | 运行间接依赖 |
 | internmap | 2.0.3 | ISC | 运行间接依赖 |
+| jszip | 3.10.2 | (MIT OR GPL-3.0-or-later) | 运行间接依赖 |
 | katex | 0.16.47 | MIT | 运行直接依赖 |
 | khroma | 2.1.0 | 见上游授权文件 | 运行间接依赖 |
 | layout-base | 1.0.2 | MIT | 运行间接依赖 |
 | layout-base | 2.0.1 | MIT | 运行间接依赖 |
 | linkify-it | 5.0.2 | MIT | 运行间接依赖 |
 | lodash-es | 4.18.1 | MIT | 运行间接依赖 |
+| lop | 0.4.2 | BSD-2-Clause | 运行间接依赖 |
+| mammoth | 1.13.0 | BSD-2-Clause | 运行直接依赖 |
 | markdown-it | 14.3.2 | MIT | 运行直接依赖 |
 | marked | 16.4.2 | MIT | 运行间接依赖 |
 | mathlive | 0.111.1 | MIT | 运行直接依赖 |
@@ -146,6 +154,7 @@
 | orderedmap | 2.1.1 | MIT | 运行间接依赖 |
 | package-manager-detector | 1.9.0 | MIT | 运行间接依赖 |
 | path-data-parser | 0.1.0 | MIT | 运行间接依赖 |
+| pdfjs-dist | 4.10.38 | Apache-2.0 | 运行直接依赖 |
 | playwright | 1.64.0 | Apache-2.0 | 开发直接依赖 |
 | playwright-core | 1.64.0 | Apache-2.0 | 运行直接依赖 |
 | points-on-curve | 0.2.0 | MIT | 运行间接依赖 |
@@ -171,6 +180,8 @@
 | tsx | 4.23.15 | MIT | 开发直接依赖 |
 | typescript | 5.9.3 | Apache-2.0 | 开发直接依赖 |
 | uc.micro | 2.1.0 | MIT | 运行间接依赖 |
+| underscore | 1.13.8 | MIT | 运行间接依赖 |
 | uuid | 14.0.3 | MIT | 运行间接依赖 |
 | vite | 7.3.7 | MIT | 开发直接依赖 |
 | w3c-keyname | 2.2.8 | MIT | 运行间接依赖 |
+| xmlbuilder | 10.1.1 | MIT | 运行间接依赖 |

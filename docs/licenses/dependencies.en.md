@@ -16,6 +16,7 @@ This inventory records installed direct and transitive runtime dependencies and 
 | @codemirror/lang-javascript | 6.2.5 | MIT | Transitive runtime dependency |
 | @codemirror/lang-markdown | 6.5.2 | MIT | Direct runtime dependency |
 | @codemirror/language | 6.13.1 | MIT | Transitive runtime dependency |
+| @codemirror/legacy-modes | 6.5.5 | MIT | Direct runtime dependency |
 | @codemirror/lint | 6.9.7 | MIT | Transitive runtime dependency |
 | @codemirror/state | 6.7.6 | MIT | Transitive runtime dependency |
 | @codemirror/streamparser | 6.0.0 | MIT | Transitive runtime dependency |
@@ -73,7 +74,10 @@ This inventory records installed direct and transitive runtime dependencies and 
 | @upsetjs/venn.js | 2.0.0 | MIT | Transitive runtime dependency |
 | @vscode/test-electron | 2.5.2 | MIT | Direct development dependency |
 | @vscode/vsce | 3.9.2 | MIT | Direct development dependency |
+| @xmldom/xmldom | 0.8.15 | MIT | Transitive runtime dependency |
+| argparse | 1.0.10 | MIT | Transitive runtime dependency |
 | argparse | 2.0.1 | Python-2.0 | Transitive runtime dependency |
+| base64-js | 1.5.1 | MIT | Transitive runtime dependency |
 | commander | 7.2.0 | MIT | Transitive runtime dependency |
 | commander | 8.3.0 | MIT | Transitive runtime dependency |
 | cose-base | 1.0.3 | MIT | Transitive runtime dependency |
@@ -120,6 +124,7 @@ This inventory records installed direct and transitive runtime dependencies and 
 | dagre-d3-es | 7.0.14 | MIT | Transitive runtime dependency |
 | dayjs | 1.11.23 | MIT | Transitive runtime dependency |
 | delaunator | 5.1.0 | ISC | Transitive runtime dependency |
+| dingbat-to-unicode | 1.0.2 | BSD-2-Clause | Transitive runtime dependency |
 | dompurify | 3.4.16 | (MPL-2.0 OR Apache-2.0) | Transitive runtime dependency |
 | entities | 4.5.0 | BSD-2-Clause | Transitive runtime dependency |
 | entities | 6.0.1 | BSD-2-Clause | Direct runtime dependency |
@@ -132,12 +137,15 @@ This inventory records installed direct and transitive runtime dependencies and 
 | import-meta-resolve | 4.2.0 | MIT | Transitive runtime dependency |
 | internmap | 1.0.1 | ISC | Transitive runtime dependency |
 | internmap | 2.0.3 | ISC | Transitive runtime dependency |
+| jszip | 3.10.2 | (MIT OR GPL-3.0-or-later) | Transitive runtime dependency |
 | katex | 0.16.47 | MIT | Direct runtime dependency |
 | khroma | 2.1.0 | See upstream license | Transitive runtime dependency |
 | layout-base | 1.0.2 | MIT | Transitive runtime dependency |
 | layout-base | 2.0.1 | MIT | Transitive runtime dependency |
 | linkify-it | 5.0.2 | MIT | Transitive runtime dependency |
 | lodash-es | 4.18.1 | MIT | Transitive runtime dependency |
+| lop | 0.4.2 | BSD-2-Clause | Transitive runtime dependency |
+| mammoth | 1.13.0 | BSD-2-Clause | Direct runtime dependency |
 | markdown-it | 14.3.2 | MIT | Direct runtime dependency |
 | marked | 16.4.2 | MIT | Transitive runtime dependency |
 | mathlive | 0.111.1 | MIT | Direct runtime dependency |
@@ -146,6 +154,7 @@ This inventory records installed direct and transitive runtime dependencies and 
 | orderedmap | 2.1.1 | MIT | Transitive runtime dependency |
 | package-manager-detector | 1.9.0 | MIT | Transitive runtime dependency |
 | path-data-parser | 0.1.0 | MIT | Transitive runtime dependency |
+| pdfjs-dist | 4.10.38 | Apache-2.0 | Direct runtime dependency |
 | playwright | 1.64.0 | Apache-2.0 | Direct development dependency |
 | playwright-core | 1.64.0 | Apache-2.0 | Direct runtime dependency |
 | points-on-curve | 0.2.0 | MIT | Transitive runtime dependency |
@@ -171,6 +180,8 @@ This inventory records installed direct and transitive runtime dependencies and 
 | tsx | 4.23.15 | MIT | Direct development dependency |
 | typescript | 5.9.3 | Apache-2.0 | Direct development dependency |
 | uc.micro | 2.1.0 | MIT | Transitive runtime dependency |
+| underscore | 1.13.8 | MIT | Transitive runtime dependency |
 | uuid | 14.0.3 | MIT | Transitive runtime dependency |
 | vite | 7.3.7 | MIT | Direct development dependency |
 | w3c-keyname | 2.2.8 | MIT | Transitive runtime dependency |
+| xmlbuilder | 10.1.1 | MIT | Transitive runtime dependency |

@@ -1,4 +1,5 @@
 import {setupLanguage,t} from './i18n/ui';
+import {applyUiScale,setupUiScaleWheel} from './ui/ui-scale';
 import { openShortcuts } from './ui/shortcuts';
 import {setupMotion,applyMotion,departSurface,highlightTarget,crossfade,revealSurface} from './ui/motion';
 import { batchHeading, batchConvert } from './batch';
@@ -76,6 +77,7 @@ const closestOf = <T extends Element = Element>(target: EventTarget | null, sele
   target instanceof Element ? target.closest<T>(selector) : null;
 const settingsRead = await loadSettings().catch(() => null);
 setupLanguage();
+applyUiScale();
 setupMotion();
 const paper = setupPaper($('render'), $('paper-toggle') as HTMLButtonElement, $('paper-zoom'), reason => error(reason));
 const sidebar = setupSidebar(reason => error(reason));
@@ -99,6 +101,11 @@ document.addEventListener('click', event => {
 }, true);
 let sourceVisible = settings().last_view?.source ?? settings().show_source, sourceDefault = settings().show_source;
 const workspace = new Workspace();
+// v0.3.0：Ctrl+滚轮调节界面缩放；落在 A4 渲染区时让给 A4 缩放。
+setupUiScaleWheel({
+  exclude: event => paper.enabled && event.target instanceof Element && !!event.target.closest('#render'),
+  onChange: percent => { const status = document.getElementById('status-text'); if (status) status.textContent = `界面缩放 ${percent}%`; },
+});
 let layoutRestore=0, readingInteraction=0;
 const recoveryRead = await readRecovery();
 // 同一文件可能留下多条恢复快照（多次打开/关闭/异常退出）。按规范化路径只恢复最新一条，
@@ -1984,11 +1991,11 @@ document.addEventListener('keydown', event => {
   if (key === 'tab') { event.preventDefault(); action(() => cycleTab(event.shiftKey ? -1 : 1)); }
   else if (key === 'w') { event.preventDefault(); action(async () => { await closeTab(workspace.activeId); }); }
   else if (key === 'o' && event.shiftKey) { event.preventDefault(); toggleOutline(); }
-  else if (key === 'r' && event.shiftKey) { event.preventDefault(); action(() => { if (!workspace.active.composition) crossfade([$('app')],()=>schedulePreview(0, true)); }); }
+  else if (key === 'r' && event.shiftKey) { event.preventDefault(); action(() => { if (workspace.active && !workspace.active.composition) crossfade([$('app')],()=>schedulePreview(0, true)); }); }
   else if (key === 'v' && event.shiftKey) { event.preventDefault(); action(switchMode); }
   else if (key === 'f') { event.preventDefault(); crossfade([$('app')],()=>{ $('search-bar').hidden = false; $<HTMLInputElement>('find').focus(); }); }
-  else if (key === 'h') { event.preventDefault(); if (!workspace.active.readOnly) crossfade([$('app')],()=>{ $('search-bar').hidden = false; $<HTMLInputElement>('replace').focus(); }); }
-  else if (workspace.active.readOnly && ['b', 'i', 'z', 'y', 'k', '1', '2', '3', '4', '5', '6'].includes(key)) event.preventDefault();
+  else if (key === 'h') { event.preventDefault(); if (workspace.active && !workspace.active.readOnly) crossfade([$('app')],()=>{ $('search-bar').hidden = false; $<HTMLInputElement>('replace').focus(); }); }
+  else if (workspace.active?.readOnly && ['b', 'i', 'z', 'y', 'k', '1', '2', '3', '4', '5', '6'].includes(key)) event.preventDefault();
   else if (!$<HTMLDialogElement>('dialog').open && !$<HTMLDialogElement>('pdf-dialog').open && (document.activeElement?.closest('.cm-editor, .ProseMirror') || document.activeElement === document.body) && (key === 'b' || key === 'i' || key === 'k' || /^[1-6]$/.test(key))) {
     event.preventDefault(); action(() => key === 'b' ? boldActive() : key === 'i' ? markActive(schema.marks.em) : key === 'k' ? openLinkDialog() : headingActive(Number(key)));
   }
@@ -2250,9 +2257,13 @@ try {
   setupTypographyControls();
   loadSystemFonts();
   const applyPreferences=()=>{
-    // 设置应用会同时改变主题、字体、A4、侧栏与视图预设：整窗做一次原位交叉淡入淡出，避免界面“闪一下”。
-    crossfade([$('app')],()=>{
+    // v0.3.0：设置即时生效。除主题外的调整直接应用，避免连续调整时界面反复闪动；
+    // 主题切换仍用原位交叉淡入淡出，避免浅色/深色直接跳变被感知为闪屏。
+    const resolvedTheme = () => settings().theme === 'system' ? (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light') : settings().theme;
+    const themeChanged = document.documentElement.dataset.theme !== resolvedTheme();
+    const applyCore = () => {
       applyMotion();
+      applyUiScale(settings().ui_scale);
       $<HTMLSelectElement>('theme').value = settings().theme;
       $<HTMLSelectElement>('default-mode').value = settings().default_mode;
       applyTypography(); setupTypographyControls(); splitControl.resize(settings().split); paper.refresh(); sidebar.refresh(); refreshTheme(); renderMenuShortcuts();
@@ -2261,9 +2272,9 @@ try {
         toggleSourceVisibility(sourceDefault);
       }
       views.restore();
-      $('status-text').textContent = '设置已保存';
       window.dispatchEvent(new Event('mdre:settings-applied'));
-    });
+    };
+    if (themeChanged) crossfade([$('app')], applyCore); else applyCore();
   };
   // v0.2.7 需求 3：设置不再打开 VS Code 面板/标签页，改为编辑器 webview 内的浮层弹窗。
   // 首次点击才加载 preferences 模块（帮助文档随模块按需载入），加载完成后复用其按钮处理。
@@ -2271,24 +2282,7 @@ try {
   let preferencesReady:Promise<PreferencesHandle>|undefined;
   const ensurePreferences=()=>preferencesReady??=(async()=>{
     const module=await import('./ui/preferences');
-    let draftTimer:ReturnType<typeof setTimeout>|undefined;
-    const preferences=module.setupPreferences({
-      open:openFloating,close:closeFloating,fonts:fontChoices,applied:applyPreferences,
-      // 草稿写入合并为 400ms 一次，避免每次输入都跨 webview 往返。
-      draftChanged:draft=>{
-        clearTimeout(draftTimer);
-        draftTimer=setTimeout(()=>{draftTimer=undefined;void invoke('settings_draft',{draft}).catch(()=>{});},400);
-        return Promise.resolve();
-      },
-      // 取消或关闭弹窗时丢弃草稿，避免重启后把已放弃的修改合并进设置。
-      draftCleared:()=>{clearTimeout(draftTimer);draftTimer=undefined;void invoke('settings_draft',{draft:null}).catch(()=>{});},
-    });
-    // VS Code 重启后仍有无效草稿时恢复到表单并提示修正；有效草稿已由宿主在激活时合并。
-    try {
-      const draft=await invoke<null|Parameters<typeof preferences.restoreDraft>[0]>('read_settings_draft');
-      if(draft&&!draft.valid)preferences.restoreDraft(draft);
-    } catch { /* 草稿读取失败不阻塞设置弹窗 */ }
-    return preferences;
+    return module.setupPreferences({open:openFloating,close:closeFloating,fonts:fontChoices,applied:applyPreferences});
   })();
   $('settings-open').onclick=()=>{void ensurePreferences().then(()=>{const dialog=$('settings-dialog') as HTMLDialogElement|null;if(!dialog?.open)$('settings-open').click();}).catch(error);};
   $('help-menu').onclick=()=>{void ensurePreferences().then(()=>$('help-menu').click()).catch(error);};

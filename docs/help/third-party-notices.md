@@ -12,6 +12,8 @@ MDRE for VS Code 采用 MIT 许可证。第三方组件的版权与使用条件�
 | markdown-it／entities | Markdown 与 HTML 实体处理 | [markdown-it](https://github.com/markdown-it/markdown-it) · [entities](https://github.com/fb55/entities) |
 | KaTeX／MathLive | 公式排版、字体与可视化编辑 | [KaTeX](https://github.com/KaTeX/KaTeX) · [MathLive](https://github.com/arnog/mathlive) |
 | Mermaid／highlight.js | 图表与代码高亮 | [Mermaid](https://github.com/mermaid-js/mermaid) · [highlight.js](https://github.com/highlightjs/highlight.js) |
+| pdf.js | PDF 页面渲染、缩放与缩略图 | [pdf.js](https://mozilla.github.io/pdf.js/) |
+| Mammoth | Word 文档转换为 HTML 供阅读 | [Mammoth](https://github.com/mwilliamson/mammoth.js) |
 | Playwright Core | 调用系统浏览器导出 PDF | [Playwright](https://github.com/microsoft/playwright) |
 
 ## 运行环境与外部工具

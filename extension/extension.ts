@@ -10,8 +10,22 @@ import { pdfBytes } from './pdf';
 import { absoluteImagePath } from '../src/image-path';
 import { readImage, clipboardImagePaths } from './image-files';
 import { listSystemFonts } from './fonts';
+import { registerAuxView, openAuxDocument } from './aux-view';
 
 const viewType = 'mdre.editor';
+// v0.3.0：插件内直接打开多种文档：md 走 MDRE 双栏编辑器，pdf/docx 走 MDRE 只读查看器，txt/代码交给 VS Code 原生编辑器。
+const MD_EXTENSIONS = new Set(['.md', '.markdown']);
+const AUX_EXTENSIONS = new Set(['.pdf', '.docx', '.doc']);
+const OPEN_FILTERS = {
+  '支持的文档': ['md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'py', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'json', 'jsonc', 'yaml', 'yml', 'toml', 'ini', 'c', 'h', 'cpp', 'hpp', 'cc', 'cs', 'java', 'kt', 'swift', 'go', 'rs', 'rb', 'php', 'lua', 'pl', 'sh', 'bash', 'ps1', 'bat', 'cmd', 'sql', 'html', 'css', 'scss', 'less', 'xml', 'svg', 'tex', 'r', 'm', 'jl', 'dart', 'vue', 'svelte', 'diff', 'log'],
+  '所有文件': ['*'],
+};
+async function openAnyDocument(uri: vscode.Uri): Promise<void> {
+  const extension = path.extname(uri.fsPath).toLowerCase();
+  if (AUX_EXTENSIONS.has(extension)) { await openAuxDocument(uri); return; }
+  if (MD_EXTENSIONS.has(extension)) { await vscode.commands.executeCommand('vscode.openWith', uri, viewType); return; }
+  await vscode.commands.executeCommand('vscode.open', uri);
+}
 type PanelRecord = { document: vscode.TextDocument; panel: vscode.WebviewPanel; editing: boolean; savedText: string };
 type SettingsDraft = {patch: Record<string,unknown>; values: Record<string,string>; valid:boolean};
 let activeProvider: MDREProvider | undefined;
@@ -25,12 +39,13 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.window.registerCustomEditorProvider(viewType, provider, {
     webviewOptions: { retainContextWhenHidden: true }, supportsMultipleEditorsPerDocument: false,
   }));
+  registerAuxView(context, () => context.globalState.get<Record<string, string>>('mdre.settings', {}).language ?? 'zh-CN');
   context.subscriptions.push(vscode.commands.registerCommand('mdre.open', async (uri?: vscode.Uri) => {
     const target = uri ?? vscode.window.activeTextEditor?.document.uri ?? provider.activeDocument?.uri;
-    if (target) await vscode.commands.executeCommand('vscode.openWith', target, viewType);
+    if (target) await openAnyDocument(target);
     else {
-      const selected = await vscode.window.showOpenDialog({ canSelectMany: false, filters: { Markdown: ['md', 'markdown'] } });
-      if (selected?.[0]) await vscode.commands.executeCommand('vscode.openWith', selected[0], viewType);
+      const selected = await vscode.window.showOpenDialog({ canSelectMany: false, filters: OPEN_FILTERS });
+      if (selected?.[0]) await openAnyDocument(selected[0]);
     }
   }));
   context.subscriptions.push(vscode.commands.registerCommand('mdre.new', () => provider.newDocument()));
@@ -152,8 +167,8 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
       case 'close': record.panel.reveal(); await vscode.commands.executeCommand('workbench.action.closeActiveEditor'); return null;
       case 'new': await this.newDocument(); return null;
       case 'open': {
-        const picked = await vscode.window.showOpenDialog({ canSelectMany: false, filters: { Markdown: ['md', 'markdown', 'txt'] } });
-        if (picked?.[0]) await vscode.commands.executeCommand('vscode.openWith', picked[0], viewType);
+        const picked = await vscode.window.showOpenDialog({ canSelectMany: false, filters: OPEN_FILTERS });
+        if (picked?.[0]) await openAnyDocument(picked[0]);
         return null;
       }
       case 'preserve_draft': {
@@ -169,8 +184,8 @@ export class MDREProvider implements vscode.CustomTextEditorProvider {
         return (await vscode.window.showOpenDialog({canSelectMany:false,title:kind==='pandoc'?ui('选择 Pandoc 程序'):ui('选择 Word 文档'),filters:kind==='pandoc'?(process.platform==='win32'?{Pandoc:['exe']}:undefined):{Word:['docx']}}))?.[0].fsPath ?? null;
       }
       case 'open_path': {
-        if(typeof args.path!=='string' || !path.isAbsolute(args.path) || !/\.md$/i.test(args.path))throw new Error(ui('需要 Markdown 绝对路径。'));
-        await vscode.commands.executeCommand('vscode.openWith',vscode.Uri.file(args.path),viewType);return null;
+        if(typeof args.path!=='string' || !path.isAbsolute(args.path))throw new Error(ui('需要绝对文件路径。'));
+        await openAnyDocument(vscode.Uri.file(args.path));return null;
       }
       case 'read_settings': return this.context.globalState.get('mdre.settings', {});
       case 'write_settings':

@@ -5,7 +5,7 @@
 <p align="center"><strong>One Markdown document. Two ways to edit.</strong><br>Synchronized Markdown source and rich-text editing inside VS Code.<br><sub>VS Code 1.95+ · English / 简体中文</sub></p>
 
 <p align="center">
-  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.7-2878d5" alt="Version 0.2.7"></a>
+  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.3.0-2878d5" alt="Version 0.3.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b8c70" alt="MIT license"></a>
   <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS_Code-1.95%2B-667085" alt="VS Code 1.95+"></a>
 </p>
@@ -22,7 +22,11 @@
 - **Work with tables and images.** Resize columns, align or merge cells, split merged cells, and browse image references in document order.
 - **Export and exchange content.** Export HTML, PDF, or a shareable ZIP, copy rich text, and paste HTML as Markdown.
 - **Convert Word documents.** Import and export `.docx` files through a separately installed Pandoc.
-- **Set up your workspace.** Open settings as a popup inside the editor and choose light or dark themes, English or Simplified Chinese, view presets, system fonts, and searchable offline help with chapter navigation.
+- **View PDF and Word documents.** Open PDFs in the MDRE viewer with zoom and page thumbnails, and read Word files in a read-only viewer.
+- **Open text and code files.** Plain text and common code files open from the MDRE open command in VS Code's own editor with highlighting and editing.
+- **Find above the editor.** Search and replace open above the document instead of using the sidebar, with consistent previous and next arrows.
+- **Scale the interface.** Resize menus, dialogs and the status bar from 80% to 200% without changing body text.
+- **Set up your workspace.** Open settings as a popup inside the editor with immediate apply, and choose light or dark themes, English or Simplified Chinese, view presets, system fonts, and searchable offline help with chapter navigation.
 
 ## Screenshot
 
@@ -33,10 +37,10 @@
 Install MDRE from the Marketplace, or install the VSIX package and run:
 
 ```powershell
-code --install-extension .\mdre-vscode-0.2.7.vsix --force
+code --install-extension .\mdre-vscode-0.3.0.vsix --force
 ```
 
-Reload VS Code, open a `.md` or `.markdown` file, and choose **Reopen Editor With → MDRE Split Editor**; you can also run **MDRE: Open split editor** from the Command Palette. The editor shows rich text first, and the split-view button reveals the Markdown source.
+Reload VS Code, open a `.md` or `.markdown` file, and choose **Reopen Editor With → MDRE Split Editor**; you can also run **MDRE: Open split editor** from the Command Palette. The same command opens PDF and Word documents in the MDRE viewer and text or code files in the editor. The editor shows rich text first, and the split-view button reveals the Markdown source.
 
 Saving, autosave, undo and redo use VS Code's document model. MDRE is an optional Markdown editor that works alongside the built-in editor.
 

@@ -5,7 +5,7 @@
 <p align="center"><strong>同一份 Markdown，两种编辑方式。</strong><br>在 VS Code 中同步编辑 Markdown 源码与富文本。<br><sub>VS Code 1.95+ · English / 简体中文</sub></p>
 
 <p align="center">
-  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.2.7-2878d5" alt="Version 0.2.7"></a>
+  <a href="https://github.com/LaizhuangJi0601/MDRE-for-VS-Code/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.3.0-2878d5" alt="Version 0.3.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b8c70" alt="MIT license"></a>
   <a href="https://code.visualstudio.com/"><img src="https://img.shields.io/badge/VS_Code-1.95%2B-667085" alt="VS Code 1.95+"></a>
 </p>
@@ -22,7 +22,11 @@
 - **处理表格与图片。** 调整列宽、对齐、合并与拆分单元格；按引用顺序浏览图片资源。
 - **导出与互通。** 导出 HTML、PDF 或可分享 ZIP；支持复制为富文本与 HTML 转 Markdown 粘贴。
 - **Word 转换。** 通过另行安装的 Pandoc 导入、导出 `.docx`。
-- **按偏好组织工作区。** 设置以编辑器内弹窗打开；提供浅色／深色主题、简体中文／English、视图预设、本机字体选择，以及可搜索的离线帮助与章节导航。
+- **查看 PDF 与 Word。** 用 MDRE 查看器打开 PDF（缩放与页面缩略图），并以只读方式阅读 Word 文档。
+- **打开文本与代码文件。** 通过 MDRE 打开命令，将纯文本与常见代码文件交给 VS Code 原生编辑器高亮与编辑。
+- **在编辑区上方查找。** 查找与替换显示在文档上方，不再占用侧栏；上一个／下一个匹配使用一致的箭头。
+- **界面缩放。** 将菜单、对话框与状态栏在 80%–200% 之间缩放，正文不受影响。
+- **按偏好组织工作区。** 设置以编辑器内弹窗打开并即时生效；提供浅色／深色主题、简体中文／English、视图预设、本机字体选择，以及可搜索的离线帮助与章节导航。
 
 ## 界面预览
 
@@ -33,10 +37,10 @@
 从扩展市场安装 MDRE，或安装 VSIX 后运行：
 
 ```powershell
-code --install-extension .\mdre-vscode-0.2.7.vsix --force
+code --install-extension .\mdre-vscode-0.3.0.vsix --force
 ```
 
-重新加载 VS Code，打开 `.md` 或 `.markdown` 文件，选择 **重新打开编辑器方式 → MDRE 双栏编辑器**；也可在命令面板运行 **MDRE: 打开双栏编辑器**。扩展默认显示富文本，工具栏的分栏按钮可显示 Markdown 源码。
+重新加载 VS Code，打开 `.md` 或 `.markdown` 文件，选择 **重新打开编辑器方式 → MDRE 双栏编辑器**；也可在命令面板运行 **MDRE: 打开双栏编辑器**。同一命令可把 PDF 与 Word 文档交给 MDRE 查看器，把文本与代码文件交给 VS Code 编辑器。扩展默认显示富文本，工具栏的分栏按钮可显示 Markdown 源码。
 
 保存、自动保存、撤销与重做使用 VS Code 原生文档机制；MDRE 是可选的 Markdown 编辑器，与内置编辑器并存。
 

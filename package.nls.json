@@ -4,5 +4,6 @@
   "command.open": "MDRE: Open split editor",
   "command.new": "MDRE: New Markdown document",
   "command.reload": "MDRE: Reload editor",
-  "editor.name": "MDRE Split Editor"
+  "editor.name": "MDRE Split Editor",
+  "editor.auxName": "MDRE PDF / Word Viewer"
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- Added a PDF viewer with 10%–400% zoom, page indicator, page thumbnails with numbers, and on-demand reading for large files.
+- Word documents open in a read-only continuous viewer; plain text and common code files open in VS Code's own editor with highlighting and editing.
+- Added an 80%–200% interface scale with a dropdown, −/+ buttons and Ctrl+wheel; body text is unaffected and the choice is remembered.
+- Settings now take effect and save immediately; Apply and Cancel are removed.
+- The Find bar opens above the document instead of using the sidebar, with matching previous and next arrows.
+- Transitions now run for about 0.4 seconds and remaining flickers are fixed; auxiliary windows appear directly at their remembered position.
+- File open dialogs accept PDF, Word, text and code files.
+
 ## 0.2.7
 
 - Fixed Mermaid diagrams failing to display when labels contain line breaks or other HTML tags; diagram source is normalized to valid SVG, and common diagram types, themes, and complex labels are covered.

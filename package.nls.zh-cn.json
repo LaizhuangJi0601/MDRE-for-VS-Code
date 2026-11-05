@@ -4,5 +4,6 @@
   "command.open": "MDRE: 打开双栏编辑器",
   "command.new": "MDRE: 新建 Markdown 文档",
   "command.reload": "MDRE: 刷新编辑界面",
-  "editor.name": "MDRE 双栏编辑器"
+  "editor.name": "MDRE 双栏编辑器",
+  "editor.auxName": "MDRE PDF / Word 查看器"
 }
